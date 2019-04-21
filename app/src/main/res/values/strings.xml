@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">OpenGLDemo</string>
+    <string name="disable">disable</string>
+    <string name="tts_hours">ttshours</string>
+    <string name="tts_hour">tktshour</string>
+    <string name="tts_minutes">tts_minutes</string>
+    <string name="tts_minute">tts_minute</string>
+    <string name="tts_seconds">tts_seconds</string>
+    <string name="tts_second">tts_second</string>
+</resources>
