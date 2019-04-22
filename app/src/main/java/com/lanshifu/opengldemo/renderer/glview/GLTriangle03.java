@@ -30,7 +30,7 @@ public class GLTriangle03 extends GLView {
     // 片元着色器的脚本
     String fragmentShaderCode =
             " precision mediump float;" +  // 声明float类型的精度为中等(精度越高越耗资源)
-                    " uniform vec4 vColor;" +       // uniform的属性vColor
+                    " varying vec4 vColor;" +       // vColor 改为 varying
                     " void main() {" +
                     "     gl_FragColor = vColor;" +  // 给此片元的填充色
                     " }";
