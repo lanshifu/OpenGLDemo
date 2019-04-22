@@ -43,9 +43,9 @@ public class GLTriangle03 extends GLView {
     static final int COORDS_PER_VERTEX = 3;
     //三角形的坐标数组
     static float triangleCoords[] = {
-            0.5f,  0.5f, 0.0f, // top
-            -0.5f, -0.5f, 0.0f, // bottom left
-            0.5f, -0.5f, 0.0f  // bottom right
+            500f, 200f, 0.0f, // top
+            500f, 500f, 0.0f, // bottom left
+            600f, 500f, 0.0f  // bottom right
     };
 
 

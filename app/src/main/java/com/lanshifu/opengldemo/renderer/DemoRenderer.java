@@ -20,6 +20,8 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class DemoRenderer implements GLSurfaceView.Renderer {
 
+    private static final String TAG = "DemoRenderer";
+
     private GLTriangle01 mGlTriangle01;
     private GLTriangle02 mGlTriangle02;
     private GLTriangle03 mColorGLTriangle;
@@ -82,7 +84,9 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
          *                 float far)          //相对观察点远面距离
          */
 
-//        Matrix.orthoM (mProjectionMatrix, 0, -ratio, ratio, -1, 2, 3, 7);          //相对观察点远面距离
+//        Matrix.orthoM (mProjectionMatrix, 0, -ratio, ratio, -1, 2, 3, 7);
+        Matrix.orthoM (mProjectionMatrix, 0,0,width, height, 0, -width, width);//这个投影会跟屏幕坐标关联上
+        Log.d(TAG, "onSurfaceChanged: width=" + width + ",height="+height);
 
         //设置透视投影（观察点越远，视图越小），这个投影矩阵被应用于对象坐标在onDrawFrame（）方法中
         /***
@@ -95,7 +99,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
          *                 float near,         //相对观察点近面距离
          *                 float far)          //相对观察点远面距离
          */
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 2, 3, 7);
+//        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 2, 3, 7);
 
         //设置相机位置
         /***
@@ -117,10 +121,10 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         // Redraw background color 重绘背景
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-//        mGlTriangle01.draw();
-//
-//        mGlTriangle02.setMvpMatrix(mMVPMatrix);
-//        mGlTriangle02.draw();
+        mGlTriangle01.draw();
+
+        mGlTriangle02.setMvpMatrix(mMVPMatrix);
+        mGlTriangle02.draw();
 
         mColorGLTriangle.setMvpMatrix(mMVPMatrix);
         mColorGLTriangle.draw();
