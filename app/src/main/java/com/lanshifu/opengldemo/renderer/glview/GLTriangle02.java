@@ -11,7 +11,7 @@ import java.nio.FloatBuffer;
  * 三角形
  * 增加矩阵变换
  */
-public class GLTriangle02 extends GLView {
+public class GLTriangle02{
 
     // 顶点着色器的脚本
     String vertexShaderCode =
@@ -44,7 +44,7 @@ public class GLTriangle02 extends GLView {
     //顶点个数，计算得出
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     //一个顶点有3个float，一个float是4个字节，所以一个顶点要12字节
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per mVertex
 
     //三角形的颜色数组，rgba
     private float[] mColor = {
@@ -92,7 +92,6 @@ public class GLTriangle02 extends GLView {
     }
 
 
-    @Override
     public void draw() {
 
         // 将程序添加到OpenGL ES环境

@@ -4,12 +4,12 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
-import android.view.MotionEvent;
 
+import com.lanshifu.opengldemo.renderer.glview.Ball;
 import com.lanshifu.opengldemo.renderer.glview.GLTriangle03;
 import com.lanshifu.opengldemo.renderer.glview.GLTriangle01;
 import com.lanshifu.opengldemo.renderer.glview.GLTriangle02;
-import com.lanshifu.opengldemo.renderer.glview.GLView;
+import com.lanshifu.opengldemo.renderer.glview.Square;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -24,7 +24,11 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
 
     private GLTriangle01 mGlTriangle01;
     private GLTriangle02 mGlTriangle02;
-    private GLTriangle03 mColorGLTriangle;
+    private GLTriangle03 mGlTrangle03;
+
+    private Square mSquare;
+
+    private Ball mBall;
 
     /**投影和相机视图相关**/
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -41,15 +45,10 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         mGlTriangle01 = new GLTriangle01();
         mGlTriangle02 = new GLTriangle02();
-        mColorGLTriangle = new GLTriangle03();
-        mGlTriangle02.setOnTouchListener(new GLView.OnTouchListener() {
-            @Override
-            public boolean onTouch(MotionEvent event) {
-                Log.e("lxb", "onTouch: mGlTriangle02");
-                return false;
-            }
+        mGlTrangle03 = new GLTriangle03();
+        mSquare = new Square();
+        mBall = new Ball();
 
-        });
         // 设置默认背景颜色，其实试了下可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
     }
@@ -74,7 +73,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         /***
          * 投影物体的大小不会随观察点的远近而发生变化，我们可以使用下面方法来执行正交投影
          *
-         *     Matrix.orthoM (float[] m,           //接收正交投影的变换矩阵
+         *     Matrix.orthoM (float[] m,       //接收正交投影的变换矩阵
          *                 int mOffset,        //变换矩阵的起始位置（偏移量）
          *                 float left,         //相对观察点近面的左边距
          *                 float right,        //相对观察点近面的右边距
@@ -126,18 +125,20 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         mGlTriangle02.setMvpMatrix(mMVPMatrix);
         mGlTriangle02.draw();
 
-        mColorGLTriangle.setMvpMatrix(mMVPMatrix);
-        mColorGLTriangle.draw();
+        mGlTrangle03.setMvpMatrix(mMVPMatrix);
+        mGlTrangle03.draw();
+
+        mSquare.setMvpMatrix(mMVPMatrix);
+        mSquare.draw();
+
+        mSquare.setMvpMatrix(mMVPMatrix);
+        mSquare.draw();
+
+        mBall.setMvpMatrix(mMVPMatrix);
+        mBall.draw();
     }
 
 
 
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mGlTriangle02 == null){
-            return false;
-        }
-        return mGlTriangle02.onTouchEvent(event);
-
-    }
 
 }

@@ -22,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Trace.beginSection("my tag");
         setContentView(R.layout.activity_main);
 
         mGLSurfaceView = findViewById(R.id.glsurfaceview);
@@ -48,12 +47,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "This device does not support OpenGL ES 2.0.",
                     Toast.LENGTH_LONG).show();
         }
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-        Trace.endSection();
     }
 
 
@@ -80,11 +73,4 @@ public class MainActivity extends AppCompatActivity {
         mGLSurfaceView.onResume();
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mRenderer != null && mRenderer.onTouchEvent(event)){
-            return true;
-        }
-        return super.onTouchEvent(event);
-    }
 }
