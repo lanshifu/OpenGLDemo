@@ -8,10 +8,6 @@ import com.lanshifu.opengldemo.utils.GLUtil;
 
 import java.nio.FloatBuffer;
 
-/**
- * 纹理
- * 增加矩阵变换
- */
 public class GlTextureView {
 
     // 顶点着色器的脚本
@@ -184,5 +180,4 @@ public class GlTextureView {
         }
         return 0;
     }
-
 }
