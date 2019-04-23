@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.lanshifu.opengldemo.renderer.DemoRenderer;
+import com.lanshifu.opengldemo.renderer.SquareRenderer;
+import com.lanshifu.opengldemo.renderer.TexttureRenderer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,8 +59,9 @@ public class MainActivity extends AppCompatActivity {
 //        SimpleRender simpleRender = new SimpleRender(DemoSurFaceViewActivity.this);
         mRenderer = new DemoRenderer();// 三角形
 //        renderer = new Triangle2();  //直角等腰彩色三角形
-//        renderer = new SquareRenderer();  //正方形
-        mGLSurfaceView.setRenderer(mRenderer);
+
+        TexttureRenderer texttureRenderer = new TexttureRenderer(this);
+        mGLSurfaceView.setRenderer(texttureRenderer);
     }
 
     @Override

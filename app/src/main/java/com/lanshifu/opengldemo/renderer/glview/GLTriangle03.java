@@ -29,7 +29,7 @@ public class GLTriangle03{
     // 片元着色器的脚本
     String fragmentShaderCode =
             " precision mediump float;" +  // 声明float类型的精度为中等(精度越高越耗资源)
-                    " varying vec4 vColor;" +       // vColor 改为 varying
+                    " varying vec4 vColor;" +       // vColor 改为 varying,代表由顶点着色器传过来的
                     " void main() {" +
                     "     gl_FragColor = vColor;" +  // 给此片元的填充色
                     " }";
@@ -119,7 +119,7 @@ public class GLTriangle03{
 
 
         // 获取片段着色器的vColor句柄
-        vColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+//        vColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
         aColorHandle = GLES20.glGetAttribLocation(mProgram, "aColor");
         // 获取变换矩阵的句柄
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
