@@ -53,10 +53,6 @@ public class GLTriangle03{
     //一个顶点有3个float，一个float是4个字节，所以一个顶点要12字节
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per mVertex
 
-    //三角形的颜色数组，rgba
-    private float[] mColor_Single = {
-            0.0f, 1.0f, 0.0f, 1.0f,
-    };
 
     private float[] mColor = {
             0.0f, 1.0f, 0.0f, 1.0f ,

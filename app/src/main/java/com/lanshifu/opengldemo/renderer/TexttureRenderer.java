@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.lanshifu.opengldemo.R;
 import com.lanshifu.opengldemo.renderer.glview.GLTriangle04;
-import com.lanshifu.opengldemo.renderer.glview.TriangleTexture;
+import com.lanshifu.opengldemo.renderer.glview.Square02;
 
 import java.io.IOException;
 
@@ -26,8 +26,8 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "DemoRenderer";
 
 
-    private TriangleTexture mTriangleTexture;
     private GLTriangle04 mGLTriangle04;
+    private Square02 mSquare02;
 
     /**
      * 投影和相机视图相关矩阵
@@ -61,9 +61,8 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
             Log.e("lxb", "initTexture: mBitmap == null");
         }
 
-        mTriangleTexture = new TriangleTexture(mContext,mBitmap);
-
         mGLTriangle04 = new GLTriangle04(mBitmap);
+        mSquare02 = new Square02(mBitmap);
 
         // 设置默认背景颜色，其实试了下可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
@@ -117,8 +116,11 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
 
 //        mTriangleTexture.drawSelf();
 
-        mGLTriangle04.setMvpMatrix(mMVPMatrix);
-        mGLTriangle04.draw();
+//        mGLTriangle04.setMvpMatrix(mMVPMatrix);
+//        mGLTriangle04.draw();
+
+        mSquare02.setMvpMatrix(mMVPMatrix);
+        mSquare02.draw();
     }
 
 
