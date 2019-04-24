@@ -1,18 +1,17 @@
 package com.lanshifu.opengldemo;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Trace;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.lanshifu.opengldemo.renderer.DemoRenderer;
-import com.lanshifu.opengldemo.renderer.SquareRenderer;
 import com.lanshifu.opengldemo.renderer.TexttureRenderer;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,10 +20,22 @@ public class MainActivity extends AppCompatActivity {
     GLSurfaceView mGLSurfaceView;
     private DemoRenderer mRenderer;
 
+    public static final int TYPE_TRANGLE = 0;
+    public static final int TYPE_GESTURE = 1;
+
+    private int type;
+
+    public static void start(Activity context, int type){
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra("type",type);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        type = getIntent().getIntExtra("type",TYPE_TRANGLE);
 
         mGLSurfaceView = findViewById(R.id.glsurfaceview);
 
@@ -45,23 +56,25 @@ public class MainActivity extends AppCompatActivity {
             // Request an OpenGL ES 2.0 compatible context.A
             mGLSurfaceView.setEGLContextClientVersion(2);
             setSimpleRender();
-        }else {
+        } else {
             Toast.makeText(this, "This device does not support OpenGL ES 2.0.",
                     Toast.LENGTH_LONG).show();
         }
     }
 
 
+    private void setSimpleRender() {
+        switch (type){
+            case TYPE_TRANGLE:
+                mRenderer = new DemoRenderer();// 三角形
+                mGLSurfaceView.setRenderer(mRenderer);
+                break;
 
-
-
-    private void setSimpleRender(){
-//        SimpleRender simpleRender = new SimpleRender(DemoSurFaceViewActivity.this);
-        mRenderer = new DemoRenderer();// 三角形
-//        renderer = new Triangle2();  //直角等腰彩色三角形
-
-        TexttureRenderer texttureRenderer = new TexttureRenderer(this);
-        mGLSurfaceView.setRenderer(texttureRenderer);
+            case TYPE_GESTURE:
+                TexttureRenderer texttureRenderer = new TexttureRenderer(this);//图片
+                mGLSurfaceView.setRenderer(texttureRenderer);
+                break;
+        }
     }
 
     @Override

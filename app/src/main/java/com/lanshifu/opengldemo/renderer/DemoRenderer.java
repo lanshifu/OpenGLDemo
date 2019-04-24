@@ -35,6 +35,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
+    private int mWidth;
+    private int mHeight;
 
     /**
      * 当GLSurfaceView中的Surface被创建的时候(界面显示)回调此方法，一般在这里做一些初始化
@@ -46,8 +48,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         mGlTriangle01 = new GLTriangle01();
         mGlTriangle02 = new GLTriangle02();
         mGlTrangle03 = new GLTriangle03();
-        mSquare = new Square();
-        mBall = new Ball();
+//        mSquare = new Square();
+//        mBall = new Ball();
 
         // 设置默认背景颜色，其实试了下可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
@@ -65,6 +67,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         // 设置绘图的窗口(可以理解成在画布上划出一块区域来画图)
         GLES20.glViewport(0,0,width,height);
 
+        mWidth = width;
+        mHeight = height;
         /**投影和相机视图相关**/
         float ratio = (float) width / height;
 
@@ -120,22 +124,20 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         // Redraw background color 重绘背景
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        mGlTriangle01.draw();
+//        mGlTriangle01.draw();
 
-        mGlTriangle02.setMvpMatrix(mMVPMatrix);
-        mGlTriangle02.draw();
+//        mGlTriangle02.setMvpMatrix(mMVPMatrix);
+//        mGlTriangle02.draw();
 
         mGlTrangle03.setMvpMatrix(mMVPMatrix);
         mGlTrangle03.draw();
 
-        mSquare.setMvpMatrix(mMVPMatrix);
-        mSquare.draw();
 
-        mSquare.setMvpMatrix(mMVPMatrix);
-        mSquare.draw();
+//        mSquare.setMvpMatrix(mMVPMatrix);
+//        mSquare.draw();
 
-        mBall.setMvpMatrix(mMVPMatrix);
-        mBall.draw();
+//        mBall.setMvpMatrix(mMVPMatrix);
+//        mBall.draw();
     }
 
 

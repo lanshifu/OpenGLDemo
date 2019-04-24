@@ -44,7 +44,7 @@ public class GLTriangle03{
     static float triangleCoords[] = {
             500f, 200f, 0.0f, // top
             500f, 500f, 0.0f, // bottom left
-            600f, 500f, 0.0f  // bottom right
+            600f, 700f, 0.0f  // bottom right
     };
 
 
@@ -116,10 +116,6 @@ public class GLTriangle03{
         /***1.获取句柄*/
         // 获取顶点着色器的位置的句柄（这里可以理解为当前绘制的顶点位置）
         vPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-
-
-        // 获取片段着色器的vColor句柄
-//        vColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
         aColorHandle = GLES20.glGetAttribLocation(mProgram, "aColor");
         // 获取变换矩阵的句柄
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
@@ -137,7 +133,7 @@ public class GLTriangle03{
         GLES20.glEnableVertexAttribArray(aColorHandle);
         GLES20.glVertexAttribPointer(aColorHandle,4,
                 GLES20.GL_FLOAT,false,
-                0,colorBuffer);
+                4*3,colorBuffer);
 
         // 将投影和视图转换传递给着色器，可以理解为给uMVPMatrix这个变量赋值为mvpMatrix
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);

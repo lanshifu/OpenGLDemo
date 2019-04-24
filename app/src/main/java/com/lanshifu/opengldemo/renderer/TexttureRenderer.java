@@ -9,7 +9,8 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.lanshifu.opengldemo.R;
-import com.lanshifu.opengldemo.renderer.glview.GlTextureView;
+import com.lanshifu.opengldemo.renderer.glview.GLTriangle04;
+import com.lanshifu.opengldemo.renderer.glview.TriangleTexture;
 
 import java.io.IOException;
 
@@ -25,12 +26,12 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "DemoRenderer";
 
 
-    private GlTextureView mGLTextureView;
+    private TriangleTexture mTriangleTexture;
+    private GLTriangle04 mGLTriangle04;
 
     /**
-     * 投影和相机视图相关
+     * 投影和相机视图相关矩阵
      **/
-    // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
@@ -54,12 +55,15 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
             mBitmap = BitmapFactory.decodeStream(mContext.getResources().getAssets().open("picture.png"));
         } catch (IOException e) {
             e.printStackTrace();
+            Log.e("lxb", "onSurfaceCreated: "+e.getMessage());
         }
         if (mBitmap == null) {
-            Log.e(TAG, "onSurfaceCreated: mBitmap == null");
+            Log.e("lxb", "initTexture: mBitmap == null");
         }
-        mGLTextureView = new GlTextureView();
-        mGLTextureView.setBitmap(mBitmap);
+
+        mTriangleTexture = new TriangleTexture(mContext,mBitmap);
+
+        mGLTriangle04 = new GLTriangle04(mBitmap);
 
         // 设置默认背景颜色，其实试了下可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
@@ -80,7 +84,7 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
         // 设置绘图的窗口(可以理解成在画布上划出一块区域来画图)
         GLES20.glViewport(0, 0, width, height);
 
-
+        //通过投影设置，适配横屏
         int w = mBitmap.getWidth();
         int h = mBitmap.getHeight();
         float sWH = w / (float) h;
@@ -111,10 +115,10 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
         // Redraw background color 重绘背景
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+//        mTriangleTexture.drawSelf();
 
-        mGLTextureView.setMvpMatrix(mMVPMatrix);
-        mGLTextureView.draw();
-
+        mGLTriangle04.setMvpMatrix(mMVPMatrix);
+        mGLTriangle04.draw();
     }
 
 

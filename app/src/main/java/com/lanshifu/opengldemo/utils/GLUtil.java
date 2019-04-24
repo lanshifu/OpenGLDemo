@@ -14,12 +14,23 @@ public class GLUtil {
 
     private static final String TAG = "ShaderUtil";
 
-    private static HashMap<String,Integer> mShaderMap = new HashMap<>();
+
+    public static int createProgram(String vertexShaderCode,String fragmentShaderCode){
+        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
+                vertexShaderCode);
+        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
+                fragmentShaderCode);
+        int program = GLES20.glCreateProgram();
+        // 添加顶点着色器到程序中
+        GLES20.glAttachShader(program, vertexShader);
+        // 添加片段着色器到程序中
+        GLES20.glAttachShader(program, fragmentShader);
+        //链接程序
+        GLES20.glLinkProgram(program);
+        return program;
+    }
 
     public static int loadShader(int shaderType, String source) {
-        if (mShaderMap.containsKey(source)){
-            return mShaderMap.get(source);
-        }
         // 创造顶点着色器类型(GLES20.GL_VERTEX_SHADER)
         // 或者是片段着色器类型 (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader(shaderType);
@@ -33,9 +44,7 @@ public class GLUtil {
             Log.e(TAG, "Could not compile shader " + shaderType + ":");
             Log.e(TAG, " " + GLES20.glGetShaderInfoLog(shader));
             GLES20.glDeleteShader(shader);
-            return -1;
         }
-        mShaderMap.put(source,shader);
         return shader;
     }
 
