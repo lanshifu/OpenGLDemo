@@ -18,6 +18,12 @@
         android:id="@+id/btn_gesture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="图片处理"/>
+        android:text="纹理处理"/>
+ <Button
+        android:id="@+id/btn_filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="图片"/>
+
 
 </LinearLayout>

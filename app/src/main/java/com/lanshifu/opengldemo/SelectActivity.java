@@ -1,5 +1,6 @@
 package com.lanshifu.opengldemo;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.lanshifu.opengldemo.image.ImageFilterActivity;
 
 import java.io.IOException;
 
@@ -22,6 +25,7 @@ public class SelectActivity extends AppCompatActivity implements View.OnClickLis
 
         findViewById(R.id.btn_trangle01).setOnClickListener(this);
         findViewById(R.id.btn_gesture).setOnClickListener(this);
+        findViewById(R.id.btn_filter).setOnClickListener(this);
         try {
             Bitmap bitmap = BitmapFactory.decodeStream(getResources().getAssets().open("picture.png"));
             ((ImageView)findViewById(R.id.iv_01)).setImageBitmap(bitmap);
@@ -41,8 +45,9 @@ public class SelectActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.btn_gesture:
                 MainActivity.start(this,MainActivity.TYPE_GESTURE);
                 break;
-//            case R.id.btn_trangle01:
-//                break;
+            case R.id.btn_filter:
+                startActivity(new Intent(SelectActivity.this,ImageFilterActivity.class));
+                break;
 //            case R.id.btn_trangle01:
 //                break;
 
