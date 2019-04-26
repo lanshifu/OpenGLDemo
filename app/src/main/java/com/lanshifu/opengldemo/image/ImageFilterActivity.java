@@ -12,6 +12,7 @@ import com.lanshifu.opengldemo.R;
 public class ImageFilterActivity extends AppCompatActivity {
 
     GLSurfaceView mGLSurfaceView;
+    private FilterRenderer mFilterRenderer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,24 +26,47 @@ public class ImageFilterActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_filter,menu);
+        getMenuInflater().inflate(R.menu.menu_filter, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.mDeal:
-//
-////                mGLView.getRender().getFilter().setHalf(isHalf);
-////                mGLView.requestRender();
-//                return super.onOptionsItemSelected(item);
-//        }
-//
-//    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mDefault:
+                mFilterRenderer.setType(FilterRenderer.Filter.NONE);
+                break;
+            case R.id.mGray:
+                mFilterRenderer.setType(FilterRenderer.Filter.GRAY);
+                break;
+            case R.id.mCool:
+                mFilterRenderer.setType(FilterRenderer.Filter.COOL);
+                break;
+            case R.id.mWarm:
+                mFilterRenderer.setType(FilterRenderer.Filter.WARM);
+                break;
+            case R.id.mBlur:
+                mFilterRenderer.setType(FilterRenderer.Filter.BLUR);
+                break;
+            case R.id.mMagn:
+                mFilterRenderer.setType(FilterRenderer.Filter.MAGN);
+                break;
+            case R.id.mFour:
+                mFilterRenderer.setType(FilterRenderer.Filter.FOUR);
+                break;
+
+//                mGLView.getRender().getFilter().setHalf(isHalf);
+//                mGLView.requestRender();
+        }
+        return super.onOptionsItemSelected(item);
+
+    }
 
     private void setSimpleRender() {
-        FilterRenderer filterRenderer = new FilterRenderer(this);//图片
-        mGLSurfaceView.setRenderer(filterRenderer);
+        //图片
+        mFilterRenderer = new FilterRenderer(this);
+        mFilterRenderer.setType(FilterRenderer.Filter.NONE);
+        mGLSurfaceView.setRenderer(mFilterRenderer);
     }
+
 }

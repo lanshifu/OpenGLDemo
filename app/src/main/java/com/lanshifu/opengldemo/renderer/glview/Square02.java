@@ -74,17 +74,17 @@ public class Square02 {
 
     private void initVertext() {
         float vertices[] = new float[]{
-                -1,1,0,
-                -1,-1,0,
-                1,-1,0,
-                1,1,0
+                -1, 1, 0,
+                -1, -1, 0,
+                1, 1, 0,
+                1, -1, 0,
         };//顶点位置
 
         float[] colors = new float[]{
-                0,0,
-                0,1,
-                1,1,
-                1,0
+                0, 0,
+                0, 1,
+                1, 0,
+                1, 1,
         };//纹理顶点数组
         mVertexBuffer = GLUtil.floatArray2FloatBuffer(vertices);
         mTexCoordBuffer = GLUtil.floatArray2FloatBuffer(colors);

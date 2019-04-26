@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
+import com.lanshifu.opengldemo.image.FilterRenderer;
 import com.lanshifu.opengldemo.utils.GLUtil;
 
 import java.nio.FloatBuffer;
@@ -35,6 +36,9 @@ public class Square03 {
                     "uniform int vChangeType;" +  //【图片处理增加两个变量，类型和改变的颜色】
                     "uniform vec3 vChangeColor;" +
 
+                    "uniform float uXY;"    +   //屏幕宽高比"
+                    "varying vec4 gPosition;"+
+
                     "void modifyColor(vec4 color){" +
                     "    color.r=max(min(color.r,1.0),0.0);" +
                     "    color.g=max(min(color.g,1.0),0.0);" +
@@ -53,7 +57,29 @@ public class Square03 {
                     "        vec4 deltaColor=nColor+vec4(vChangeColor,0.0);" +
                     "        modifyColor(deltaColor);" +
                     "        gl_FragColor=deltaColor;" +
-                    "    }else{" +
+                    "    }" +
+                    "   else if(vChangeType==4){  //放大镜效果\n" +
+                    "            float dis=distance(vec2(gPosition.x,gPosition.y/uXY),vec2(vChangeColor.r,vChangeColor.g));\n" +
+                    "            if(dis<vChangeColor.b){\n" +
+                    "                nColor=texture2D(vTexture,vec2(aCoordinate.x/2.0+0.25,aCoordinate.y/2.0+0.25));\n" +
+                    "            }\n" +
+                    "            gl_FragColor=nColor;\n" +
+                    "        }"+
+                    "   else if(vChangeType==5){" +  //四分镜无法就是把整张图片缩成四份，然后分别放在左上角、右上角、左下角、右下角等地方。我们可以通过改变UV坐标得到
+                    "           vec2 uv = vTextureCoord;" +
+                    "           if (uv.x <= 0.5) {" +
+                    "               uv.x = uv.x * 2.0;" +
+                    "           } else {" +
+                    "                uv.x = (uv.x - 0.5) * 2.0;" +
+                    "            }" +
+                    "           if (uv.y <= 0.5) {" +
+                    "              uv.y = uv.y * 2.0;" +
+                    "            } else {" +
+                    "             uv.y = (uv.y - 0.5) * 2.0;" +
+                    "            }" +
+                    "           gl_FragColor = texture2D(vTexture, fract(uv));"+
+                    "   }" +
+                    "   else{" +
                     "        gl_FragColor=nColor;" + //不处理
                     "    }" +
                     " }";
@@ -79,13 +105,18 @@ public class Square03 {
 
     private int hChangeType;
     private int hChangeColor;
+    private int uXY;
 
     //变换矩阵，提供set方法
     private float[] mvpMatrix = new float[16];
+    private FilterRenderer.Filter mFilter;
     private int mTextureId;
 
     public void setMvpMatrix(float[] mvpMatrix) {
         this.mvpMatrix = mvpMatrix;
+    }
+    public void setFilter(FilterRenderer.Filter filter) {
+        this.mFilter = filter;
     }
 
     private Bitmap mBitmap;
@@ -130,6 +161,7 @@ public class Square03 {
 
         hChangeType=GLES20.glGetUniformLocation(mProgram,"vChangeType");
         hChangeColor=GLES20.glGetUniformLocation(mProgram,"vChangeColor");
+        uXY=GLES20.glGetUniformLocation(mProgram,"uXY");
     }
 
     private void initTexture() {
@@ -194,8 +226,8 @@ public class Square03 {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
 
         /***传递滤镜类型和颜色过去，片元着色器会根据类型做不同处理，原本的ARG通道分别乘以传过去的ARG，相加得到一个新的值，作为新的ARG的值*/
-        GLES20.glUniform1i(hChangeType,1);
-        GLES20.glUniform3fv(hChangeColor,1,new float[]{0.299f,0.587f,0.114f},0);
+        GLES20.glUniform1i(hChangeType,mFilter.getType());
+        GLES20.glUniform3fv(hChangeColor,1,mFilter.data(),0);
 //        GLES20.glUniform3fv(hChangeColor,2,new float[]{0.0f,0.0f,0.1f},0);
 
         /** 绘制三角形，三个顶点*/
