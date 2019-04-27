@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".image.ImageFilterActivity" />
+        <activity android:name=".VaryActivity" />
     </application>
 
 </manifest>

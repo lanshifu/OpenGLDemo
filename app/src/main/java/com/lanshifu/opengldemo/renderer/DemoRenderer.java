@@ -11,6 +11,7 @@ import com.lanshifu.opengldemo.renderer.glview.GLTriangle03;
 import com.lanshifu.opengldemo.renderer.glview.GLTriangle01;
 import com.lanshifu.opengldemo.renderer.glview.GLTriangle02;
 import com.lanshifu.opengldemo.renderer.glview.Square;
+import com.lanshifu.opengldemo.utils.VaryTools;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -47,8 +48,8 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
      */
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-//        mGlTriangle01 = new GLTriangle01();
-//        mGlTriangle02 = new GLTriangle02();
+        mGlTriangle01 = new GLTriangle01();
+        mGlTriangle02 = new GLTriangle02();
 //        mGlTrangle03 = new GLTriangle03();
         mCube = new Cube();
 //        mSquare = new Square();
@@ -90,7 +91,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
          *                 float far)          //相对观察点远面距离
          */
 
-//        Matrix.orthoM (mProjectionMatrix, 0, -ratio, ratio, -1, 2, 3, 7);
+        Matrix.orthoM (mProjectionMatrix, 0,-ratio*6,ratio*6,-6,6,3,20);
 //        Matrix.orthoM (mProjectionMatrix, 0,0,width, height, 0, -width, width);//这个投影会跟屏幕坐标关联上
         Log.d(TAG, "onSurfaceChanged: width=" + width + ",height="+height);
 
@@ -105,7 +106,7 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
          *                 float near,         //相对观察点近面距离
          *                 float far)          //相对观察点远面距离
          */
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 20);
+//        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 20);
 
         //设置相机位置
         /***
@@ -115,10 +116,9 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
          *                 float centerX,float centerY,float centerZ,  //观察点位置
          *                 float upX,float upY,float upZ)  //up向量在xyz上的分量
          */
-        Matrix.setLookAtM(mViewMatrix, 0, 5.0f, 5.0f, 10.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0f, 0f, 10.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         //计算变换矩阵
         Matrix.multiplyMM(mMVPMatrix,0,mProjectionMatrix,0,mViewMatrix,0);
-
 
 
     }
@@ -131,10 +131,10 @@ public class DemoRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);// 开启深度测试
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
 
-//        mGlTriangle01.draw();
+        mGlTriangle01.draw();
 
-//        mGlTriangle02.setMvpMatrix(mMVPMatrix);
-//        mGlTriangle02.draw();
+        mGlTriangle02.setMvpMatrix(mMVPMatrix);
+        mGlTriangle02.draw();
 
 //        mGlTrangle03.setMvpMatrix(mMVPMatrix);
 //        mGlTrangle03.draw();
