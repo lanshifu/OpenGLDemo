@@ -1,8 +1,10 @@
 package com.lanshifu.opengldemo.utils;
 
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.util.Log;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -103,5 +105,26 @@ public class GLUtil {
         mBuffer.put(arr);
         mBuffer.position(0);
         return mBuffer;
+    }
+
+    public static int createProgram(Resources res, String vertexRes, String fragmentRes){
+        return createProgram(loadFromAssetsFile(vertexRes,res),loadFromAssetsFile(fragmentRes,res));
+    }
+
+
+
+    public static String loadFromAssetsFile(String fname, Resources res){
+        StringBuilder result=new StringBuilder();
+        try{
+            InputStream is=res.getAssets().open(fname);
+            int ch;
+            byte[] buffer=new byte[1024];
+            while (-1!=(ch=is.read(buffer))){
+                result.append(new String(buffer,0,ch));
+            }
+        }catch (Exception e){
+            return null;
+        }
+        return result.toString().replaceAll("\\r\\n","\n");
     }
 }

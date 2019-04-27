@@ -23,7 +23,6 @@ public class Square02 {
             "varying vec2 vTextureCoord;" +     //增加用于传递给片元着色器的纹理位置变量
             "void main() {" +
                     "gl_Position = uMVPMatrix * vPosition;" +  //矩阵变换计算之后的位置
-//                "  gl_Position = vPosition;" +  //没有矩阵变换的位置
                     "vTextureCoord = aTexCoord;" +
             " }";
 
@@ -117,12 +116,12 @@ public class Square02 {
 
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
                 GLES20.GL_TEXTURE_MIN_FILTER,GLES20.GL_NEAREST);//设置MIN 采样方式
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);//设置MAG采样方式
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);//设置S轴拉伸方式
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);//设置T轴拉伸方式
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+//                GLES20.GL_TEXTURE_MAG_FILTER,GLES20.GL_LINEAR);//设置MAG采样方式
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+//                GLES20.GL_TEXTURE_WRAP_S,GLES20.GL_CLAMP_TO_EDGE);//设置S轴拉伸方式
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+//                GLES20.GL_TEXTURE_WRAP_T,GLES20.GL_CLAMP_TO_EDGE);//设置T轴拉伸方式
 
         if (mBitmap == null){
             Log.e("lxb", "initTexture: mBitmap == null");
@@ -160,8 +159,6 @@ public class Square02 {
 
         //设置使用的纹理编号
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        //绑定指定的纹理id
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,mTextureId);
 
         /** 绘制三角形，三个顶点*/
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);

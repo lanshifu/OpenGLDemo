@@ -36,6 +36,7 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private Context mContext;
     private Bitmap mBitmap;
+    private float mWH;
 
     public FilterRenderer(Context context) {
         mContext = context;
@@ -60,7 +61,7 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
             Log.e("lxb", "initTexture: mBitmap == null");
         }
 
-        mSquare03 = new Square03(mBitmap);
+        mSquare03 = new Square03(mContext,mBitmap);
 
         // 设置默认背景颜色，其实试了下可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
@@ -84,19 +85,19 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
         //通过投影设置，适配横屏
         int w = mBitmap.getWidth();
         int h = mBitmap.getHeight();
-        float sWH = w / (float) h;
+        mWH = w / (float) h;
         float sWidthHeight = width / (float) height;
         if (width > height) {
-            if (sWH > sWidthHeight) {
-                Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight * sWH, sWidthHeight * sWH, -1, 1, 3, 7);
+            if (mWH > sWidthHeight) {
+                Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight * mWH, sWidthHeight * mWH, -1, 1, 3, 7);
             } else {
-                Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / sWH, sWidthHeight / sWH, -1, 1, 3, 7);
+                Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / mWH, sWidthHeight / mWH, -1, 1, 3, 7);
             }
         } else {
-            if (sWH > sWidthHeight) {
-                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1 / sWidthHeight * sWH, 1 / sWidthHeight * sWH, 3, 7);
+            if (mWH > sWidthHeight) {
+                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1 / sWidthHeight * mWH, 1 / sWidthHeight * mWH, 3, 7);
             } else {
-                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -sWH / sWidthHeight, sWH / sWidthHeight, 3, 7);
+                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -mWH / sWidthHeight, mWH / sWidthHeight, 3, 7);
             }
         }
         //设置相机位置
@@ -118,6 +119,7 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
 //        mGLTriangle04.draw();
 
         mSquare03.setMvpMatrix(mMVPMatrix);
+        mSquare03.setMxy(mWH);
         mSquare03.setFilter(filter);
         mSquare03.draw();
     }
@@ -132,9 +134,9 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
 
         NONE(0,new float[]{0.0f,0.0f,0.0f}),
         GRAY(1,new float[]{0.299f,0.587f,0.114f}),
-        COOL(2,new float[]{0.0f,0.0f,0.1f}),
-        WARM(2,new float[]{0.1f,0.1f,0.0f}),
-        BLUR(3,new float[]{0.006f,0.004f,0.002f}),
+        COOL(2,new float[]{0.0f,0.0f,0.5f}), //冷就是多加点蓝
+        WARM(2,new float[]{0.2f,0.2f,0.0f}), //暖就是多加点红跟绿
+        BLUR(3,new float[]{0.002f,0.002f,0.002f}), //距离越大越模糊
         MAGN(4,new float[]{0.0f,0.0f,0.4f}),
         FOUR(5,new float[]{0.0f,0.0f,0.0f}); //四分镜
 

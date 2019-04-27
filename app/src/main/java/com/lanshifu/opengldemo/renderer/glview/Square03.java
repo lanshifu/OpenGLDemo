@@ -1,5 +1,6 @@
 package com.lanshifu.opengldemo.renderer.glview;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -16,73 +17,11 @@ import java.nio.FloatBuffer;
  */
 public class Square03 {
 
-    // 顶点着色器的脚本
-    String vertexShaderCode =
-            "uniform mat4 uMVPMatrix;" +         //接收传入的转换矩阵
-                    "attribute vec4 vPosition;" +      //接收传入的顶点
-                    "attribute vec2 aTexCoord;" +       //接收传入的顶点纹理位置
-                    "varying vec2 vTextureCoord;" +     //增加用于传递给片元着色器的纹理位置变量
-                    "void main() {" +
-                        "gl_Position = uMVPMatrix * vPosition;" +  //矩阵变换计算之后的位置
-                        "vTextureCoord = aTexCoord;" +
-                    " }";
+    // 顶点着色器的代码
+    String vertexShaderCode;
 
-
-    // 片元着色器的脚本
-    String fragmentShaderCode =
-            " precision mediump float;" +  // 声明float类型的精度为中等(精度越高越耗资源)
-                    "varying vec2 vTextureCoord;" +
-                    "uniform sampler2D vTexture;" + //纹理采样器，代表一副纹理
-                    "uniform int vChangeType;" +  //【图片处理增加两个变量，类型和改变的颜色】
-                    "uniform vec3 vChangeColor;" +
-
-                    "uniform float uXY;"    +   //屏幕宽高比"
-                    "varying vec4 gPosition;"+
-
-                    "void modifyColor(vec4 color){" +
-                    "    color.r=max(min(color.r,1.0),0.0);" +
-                    "    color.g=max(min(color.g,1.0),0.0);" +
-                    "    color.b=max(min(color.b,1.0),0.0);" +
-                    "    color.a=max(min(color.a,1.0),0.0);" +
-                    "}" +
-
-                    "void main() {" +
-                    "    vec4 nColor = texture2D(vTexture,vTextureCoord);" +//进行纹理采样
-                    "     if(vChangeType==1){" + //黑白处理，
-                    "        float c=nColor.r*vChangeColor.r+nColor.g*vChangeColor.g+nColor.b*vChangeColor.b;" +
-                    "        gl_FragColor=vec4(c,c,c,nColor.a);" +
-//                    "        float c=(nColor.r+nColor.g+nColor.b)/3.0"+
-//                    "        gl_FragColor=vec4(c,c,c,nColor.a)"+
-                    "    }else if(vChangeType==2){" +  //简单色彩处理，冷暖色调、增加亮度、降低亮度等
-                    "        vec4 deltaColor=nColor+vec4(vChangeColor,0.0);" +
-                    "        modifyColor(deltaColor);" +
-                    "        gl_FragColor=deltaColor;" +
-                    "    }" +
-                    "   else if(vChangeType==4){  //放大镜效果\n" +
-                    "            float dis=distance(vec2(gPosition.x,gPosition.y/uXY),vec2(vChangeColor.r,vChangeColor.g));\n" +
-                    "            if(dis<vChangeColor.b){\n" +
-                    "                nColor=texture2D(vTexture,vec2(aCoordinate.x/2.0+0.25,aCoordinate.y/2.0+0.25));\n" +
-                    "            }\n" +
-                    "            gl_FragColor=nColor;\n" +
-                    "        }"+
-                    "   else if(vChangeType==5){" +  //四分镜无法就是把整张图片缩成四份，然后分别放在左上角、右上角、左下角、右下角等地方。我们可以通过改变UV坐标得到
-                    "           vec2 uv = vTextureCoord;" +
-                    "           if (uv.x <= 0.5) {" +
-                    "               uv.x = uv.x * 2.0;" +
-                    "           } else {" +
-                    "                uv.x = (uv.x - 0.5) * 2.0;" +
-                    "            }" +
-                    "           if (uv.y <= 0.5) {" +
-                    "              uv.y = uv.y * 2.0;" +
-                    "            } else {" +
-                    "             uv.y = (uv.y - 0.5) * 2.0;" +
-                    "            }" +
-                    "           gl_FragColor = texture2D(vTexture, fract(uv));"+
-                    "   }" +
-                    "   else{" +
-                    "        gl_FragColor=nColor;" + //不处理
-                    "    }" +
-                    " }";
+    // 片元着色器的代码
+    String fragmentShaderCode;
 
     private FloatBuffer mVertexBuffer;  //顶点坐标数据要转化成FloatBuffer格式
     private FloatBuffer mTexCoordBuffer;//顶点纹理坐标缓存
@@ -119,9 +58,17 @@ public class Square03 {
         this.mFilter = filter;
     }
 
+    private Context mContext;
     private Bitmap mBitmap;
 
-    public Square03(Bitmap bitmap) {
+    public void setMxy(float mxy) {
+        this.mxy = mxy;
+    }
+
+    private float mxy;
+
+    public Square03(Context context,Bitmap bitmap) {
+        mContext = context;
         this.mBitmap = bitmap;
         initVertext();
         initShder();
@@ -150,6 +97,9 @@ public class Square03 {
 
     private void initShder() {
         //获取程序，封装了加载、链接等操作
+        vertexShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_vertex.glsl", mContext.getResources());
+        fragmentShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_fragment.glsl", mContext.getResources());
+
         mProgram = GLUtil.createProgram(vertexShaderCode, fragmentShaderCode);
         /***1.获取句柄*/
         // 获取顶点着色器的位置的句柄（这里可以理解为当前绘制的顶点位置）
@@ -228,7 +178,10 @@ public class Square03 {
         /***传递滤镜类型和颜色过去，片元着色器会根据类型做不同处理，原本的ARG通道分别乘以传过去的ARG，相加得到一个新的值，作为新的ARG的值*/
         GLES20.glUniform1i(hChangeType,mFilter.getType());
         GLES20.glUniform3fv(hChangeColor,1,mFilter.data(),0);
+        GLES20.glUniform1f(uXY,mxy);
 //        GLES20.glUniform3fv(hChangeColor,2,new float[]{0.0f,0.0f,0.1f},0);
+
+
 
         /** 绘制三角形，三个顶点*/
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
