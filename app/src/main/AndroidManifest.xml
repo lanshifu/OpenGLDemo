@@ -31,6 +31,7 @@
         <activity android:name=".VaryActivity" />
         <activity android:name=".preview.PreviewActivity" />
         <activity android:name=".camera.Camera2Activity" />
+        <activity android:name=".camera.Camera2DemoActivity" />
     </application>
 
 </manifest>
