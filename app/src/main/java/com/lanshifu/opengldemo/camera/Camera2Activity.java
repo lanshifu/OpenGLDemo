@@ -216,7 +216,7 @@ public class Camera2Activity extends AppCompatActivity implements FrameCallback 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private class Camera2Renderer implements Renderer {qq
+    private class Camera2Renderer implements Renderer {
 
         CameraDevice mDevice;
         CameraManager mCameraManager;
