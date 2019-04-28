@@ -12,7 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.lanshifu.opengldemo.renderer.DemoRenderer;
-import com.lanshifu.opengldemo.renderer.TexttureRenderer;
+import com.lanshifu.opengldemo.renderer.TextureRenderer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case TYPE_GESTURE:
-                TexttureRenderer texttureRenderer = new TexttureRenderer(this);//图片
-                mGLSurfaceView.setRenderer(texttureRenderer);
+                TextureRenderer textureRenderer = new TextureRenderer(this);//图片
+                mGLSurfaceView.setRenderer(textureRenderer);
                 break;
         }
     }

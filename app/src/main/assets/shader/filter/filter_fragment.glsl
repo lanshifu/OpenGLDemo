@@ -6,7 +6,7 @@ uniform int vChangeType;//【应用需要传类型过来，对不同类型做不
 uniform vec3 vChangeColor;
 
 uniform float uXY;//屏幕宽高比
-varying vec4 gPosition;
+varying vec4 gPosition; //顶点着色器把坐标传过来
 
 void modifyColor(vec4 color){
     color.r=max(min(color.r, 1.0), 0.0);
@@ -18,14 +18,14 @@ void modifyColor(vec4 color){
 void main() {
     vec4 nColor = texture2D(vTexture, vTextureCoord);//进行纹理采样,拿到当前颜色
     if (vChangeType==1){ //黑白处理，两种方式都可以
-        //        float c=nColor.r*vChangeColor.r+nColor.g*vChangeColor.g+nColor.b*vChangeColor.b;
-        //        gl_FragColor=vec4(c, c, c, nColor.a);
+//        float c=nColor.r*vChangeColor.r+nColor.g*vChangeColor.g+nColor.b*vChangeColor.b;
+//        gl_FragColor=vec4(c, c, c, nColor.a);
         float c=(nColor.r + nColor.g + nColor.b)/3.0;
         gl_FragColor=vec4(c, c, c, nColor.a);
     } else if (vChangeType==2){ //简单色彩处理，冷暖色调、增加亮度、降低亮度等
         //颜色相加，冷就是多加点蓝，暖就是多加点红跟绿
         vec4 deltaColor=nColor + vec4(vChangeColor, 0.0);
-        //        modifyColor(deltaColor);
+//        modifyColor(deltaColor);
         gl_FragColor=deltaColor;
     } else if (vChangeType==3){ //模糊处理，取与当前颜色相近的周边12个点的颜色，加上本身的颜色，取平均值
         nColor+=texture2D(vTexture, vec2(vTextureCoord.x-vChangeColor.r, vTextureCoord.y-vChangeColor.r));

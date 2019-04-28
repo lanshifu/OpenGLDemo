@@ -21,7 +21,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * 纹理贴图
  */
-public class TexttureRenderer implements GLSurfaceView.Renderer {
+public class TextureRenderer implements GLSurfaceView.Renderer {
 
     private static final String TAG = "DemoRenderer";
 
@@ -38,7 +38,7 @@ public class TexttureRenderer implements GLSurfaceView.Renderer {
     private Context mContext;
     private Bitmap mBitmap;
 
-    public TexttureRenderer(Context context) {
+    public TextureRenderer(Context context) {
         mContext = context;
     }
 

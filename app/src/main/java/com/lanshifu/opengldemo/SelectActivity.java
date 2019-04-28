@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.lanshifu.opengldemo.camera.Camera2Activity;
 import com.lanshifu.opengldemo.image.ImageFilterActivity;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class SelectActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.btn_gesture).setOnClickListener(this);
         findViewById(R.id.btn_filter).setOnClickListener(this);
         findViewById(R.id.btn_vary).setOnClickListener(this);
+        findViewById(R.id.btn_camera).setOnClickListener(this);
         try {
             Bitmap bitmap = BitmapFactory.decodeStream(getResources().getAssets().open("picture.png"));
             ((ImageView)findViewById(R.id.iv_01)).setImageBitmap(bitmap);
@@ -51,6 +53,9 @@ public class SelectActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.btn_vary:
                 startActivity(new Intent(SelectActivity.this,VaryActivity.class));
+                break;
+          case R.id.btn_camera:
+                startActivity(new Intent(SelectActivity.this,Camera2Activity.class));
                 break;
 
 
