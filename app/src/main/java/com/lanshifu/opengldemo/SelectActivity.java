@@ -11,7 +11,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.lanshifu.opengldemo.camera.Camera2Activity;
-import com.lanshifu.opengldemo.camera.Camera2DemoActivity;
+import com.lanshifu.opengldemo.camera.Camera2Demo_TextureView_Activity;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.Camera2Demo_SurfaceView_Activity;
 import com.lanshifu.opengldemo.image.ImageFilterActivity;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class SelectActivity extends AppCompatActivity implements View.OnClickLis
                 startActivity(new Intent(SelectActivity.this,VaryActivity.class));
                 break;
           case R.id.btn_camera_demo:
-                startActivity(new Intent(SelectActivity.this, Camera2DemoActivity.class));
+                startActivity(new Intent(SelectActivity.this, Camera2Demo_SurfaceView_Activity.class));
                 break;
           case R.id.btn_camera:
                 startActivity(new Intent(SelectActivity.this,Camera2Activity.class));

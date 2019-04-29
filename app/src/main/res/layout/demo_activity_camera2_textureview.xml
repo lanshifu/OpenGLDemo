@@ -8,9 +8,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <SurfaceView android:layout_width="match_parent"
+        <TextureView
+            android:id="@+id/camera_texture_view"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/mSurface"
             android:layout_weight="1"/>
 
         <FrameLayout

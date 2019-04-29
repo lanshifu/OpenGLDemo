@@ -1,7 +1,7 @@
-attribute vec4 vPosition;
+attribute vec4 vPosition; //顶点坐标
 attribute vec2 vCoord;
 uniform mat4 vMatrix;
-uniform mat4 vCoordMatrix;
+uniform mat4 vCoordMatrix; //纹理矩阵
 varying vec2 textureCoordinate;
 
 void main(){

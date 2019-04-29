@@ -31,7 +31,8 @@
         <activity android:name=".VaryActivity" />
         <activity android:name=".preview.PreviewActivity" />
         <activity android:name=".camera.Camera2Activity" />
-        <activity android:name=".camera.Camera2DemoActivity" />
+        <activity android:name=".camera.Camera2Demo_TextureView_Activity" />
+        <activity android:name=".camera.camera2_surface_demo.Camera2Demo_SurfaceView_Activity" />
     </application>
 
 </manifest>

@@ -14,6 +14,7 @@ import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
@@ -94,10 +95,52 @@ public class Camera2Renderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         Log.d(TAG, "onSurfaceCreated: ");
+
+
+        int mOESTextureId = createOESTextureObject();
+        initSurfaceTexture(mOESTextureId);
+
         mCameraPreview = new CameraPreview(mContext);
 
 
+    }
 
+    /**
+     * 之后根据OES纹理Id创建SurfaceTexture，用来接收Camera2的预览数据。
+     * @param mOESTextureId
+     * @return
+     */
+    public boolean initSurfaceTexture(int mOESTextureId) {
+        //根据OES纹理ID实例化SurfaceTexture
+        mSurfaceTexture = new SurfaceTexture(mOESTextureId);
+        //当SurfaceTexture接收到一帧数据时，请求OpenGL ES进行渲染
+        mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+            @Override
+            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                mGLSurfaceView.requestRender();
+            }
+        });
+        return true;
+    }
+
+    /**
+     * 创建一个OES纹理
+     * @return
+     */
+    public static int createOESTextureObject() {
+        int[] tex = new int[1];
+        GLES20.glGenTextures(1, tex, 0);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, tex[0]);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_WRAP_S, GL10.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GL10.GL_TEXTURE_WRAP_T, GL10.GL_CLAMP_TO_EDGE);
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+        return tex[0];
     }
 
     @Override
@@ -116,6 +159,13 @@ public class Camera2Renderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         //显示传入的texture上，一般是显示在屏幕上
+
+        if (mSurfaceTexture != null) {
+            //更新数据，其实也是消耗数据，将上一帧的数据处理或者抛弃掉，要不然SurfaceTexture是接收不到最新数据
+            mSurfaceTexture.updateTexImage();
+            mSurfaceTexture.getTransformMatrix(mvpMatrix);
+        }
+
 
         mCameraPreview.setMvpMatrix(mvpMatrix);
         mCameraPreview.setTextureId(mCameraTexture[0]);

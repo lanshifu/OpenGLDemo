@@ -102,6 +102,9 @@ public class CameraPreview {
         onBindTexture();
 //        initTexture();
     }
+
+
+
     private void initShder() {
         //获取程序，封装了加载、链接等操作
         vertexShaderCode = GLUtil.loadFromAssetsFile("shader/oes_base_vertex.glsl", mContext.getResources());
