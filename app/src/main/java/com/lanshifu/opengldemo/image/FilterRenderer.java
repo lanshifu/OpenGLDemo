@@ -8,8 +8,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.lanshifu.opengldemo.renderer.glview.GLTriangle04;
-import com.lanshifu.opengldemo.renderer.glview.Square02;
+import com.lanshifu.opengldemo.BaseRenderer;
 import com.lanshifu.opengldemo.renderer.glview.Square03;
 
 import java.io.IOException;
@@ -21,12 +20,18 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * 纹理贴图
  */
-public class FilterRenderer implements GLSurfaceView.Renderer {
+public class FilterRenderer extends BaseRenderer {
 
     private static final String TAG = "DemoRenderer";
 
 
     private Square03 mSquare03;
+
+    BaseFilter mFilterView;
+
+    public void setFilterView(BaseFilter filterView) {
+        mFilterView = filterView;
+    }
 
     /**
      * 投影和相机视图相关矩阵
@@ -51,19 +56,23 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
+        mSquare03 = new Square03(mContext, mBitmap);
+
         try {
             mBitmap = BitmapFactory.decodeStream(mContext.getResources().getAssets().open("picture.png"));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("lxb", "onSurfaceCreated: "+e.getMessage());
+            Log.e("lxb", "onSurfaceCreated: " + e.getMessage());
         }
         if (mBitmap == null) {
             Log.e("lxb", "initTexture: mBitmap == null");
         }
 
-        mSquare03 = new Square03(mContext,mBitmap);
 
-        // 设置默认背景颜色，其实试了下可以在onDrawFrame中重新设置
+
+//        mFilterView = new BaseFilter(mContext, mBitmap);
+
+        // 设置默认背景颜色，可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
         GLES20.glEnable(GLES20.GL_TEXTURE_2D);
 
@@ -105,11 +114,17 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
         //计算变换矩阵
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectMatrix, 0, mViewMatrix, 0);
 
+
+
+
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
 
+        if (filterChange) {
+            updateFilterView();
+        }
         // Redraw background color 重绘背景
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -120,39 +135,85 @@ public class FilterRenderer implements GLSurfaceView.Renderer {
 
         mSquare03.setMvpMatrix(mMVPMatrix);
         mSquare03.setMxy(mWH);
-        mSquare03.setFilter(filter);
+        mSquare03.setFilter(Filter.NONE);
         mSquare03.draw();
+
+        if (mFilterView == null) {
+            Log.e(TAG, "onDrawFrame: mFilterView == null");
+            return;
+        }
+
+        mFilterView.setMvpMatrix(mMVPMatrix);
+        mFilterView.draw();
+
     }
 
 
+
+    boolean filterChange = false;
     Filter filter;
-    public void setType(Filter filter){
+
+    public void setType(Filter filter) {
+        if (this.filter == filter){
+            Log.d(TAG, "setType: this.filter == filter");
+            return;
+        }
         this.filter = filter;
+        filterChange = true;
+
     }
 
-    public enum Filter{
+    void updateFilterView() {
 
-        NONE(0,new float[]{0.0f,0.0f,0.0f}),
-        GRAY(1,new float[]{0.299f,0.587f,0.114f}),
-        COOL(2,new float[]{0.0f,0.0f,0.5f}), //冷就是多加点蓝
-        WARM(2,new float[]{0.2f,0.2f,0.0f}), //暖就是多加点红跟绿
-        BLUR(3,new float[]{0.002f,0.002f,0.002f}), //距离越大越模糊
-        MAGN(4,new float[]{0.0f,0.0f,0.4f}),
-        FOUR(5,new float[]{0.0f,0.0f,0.0f}); //四分镜
+        mFilterView = null;
+        switch (this.filter) {
+            case BLUR:
+                mFilterView = new GrayFilter(mContext, mBitmap);
+                break;
+            case NONE:
+                mFilterView = new BaseFilter(mContext, mBitmap);
+                break;
+            default:
+                mFilterView = new BaseFilter(mContext, mBitmap);
+                break;
+
+
+        }
+
+        filterChange = false;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mFilterView != null){
+            mFilterView.onDestroy();
+        }
+    }
+
+
+    public enum Filter {
+
+        NONE(0, new float[]{0.0f, 0.0f, 0.0f}),
+        GRAY(1, new float[]{0.299f, 0.587f, 0.114f}),
+        COOL(2, new float[]{0.0f, 0.0f, 0.5f}), //冷就是多加点蓝
+        WARM(2, new float[]{0.2f, 0.2f, 0.0f}), //暖就是多加点红跟绿
+        BLUR(3, new float[]{0.002f, 0.002f, 0.002f}), //距离越大越模糊
+        MAGN(4, new float[]{0.0f, 0.0f, 0.4f}),
+        FOUR(5, new float[]{0.0f, 0.0f, 0.0f}); //四分镜
 
         private int vChangeType;
         private float[] data;
 
-        Filter(int vChangeType,float[] data){
-            this.vChangeType=vChangeType;
-            this.data=data;
+        Filter(int vChangeType, float[] data) {
+            this.vChangeType = vChangeType;
+            this.data = data;
         }
 
-        public int getType(){
+        public int getType() {
             return vChangeType;
         }
 
-        public float[] data(){
+        public float[] data() {
             return data;
         }
 

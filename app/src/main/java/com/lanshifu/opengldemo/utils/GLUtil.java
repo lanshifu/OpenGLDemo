@@ -22,7 +22,10 @@ public class GLUtil {
                 vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
                 fragmentShaderCode);
+        Log.d(TAG, "createProgram: vertexShader ="+vertexShader);
+        Log.d(TAG, "createProgram: fragmentShader ="+fragmentShader);
         int program = GLES20.glCreateProgram();
+        Log.d(TAG, "createProgram: program="+program);
         // 添加顶点着色器到程序中
         GLES20.glAttachShader(program, vertexShader);
         // 添加片段着色器到程序中

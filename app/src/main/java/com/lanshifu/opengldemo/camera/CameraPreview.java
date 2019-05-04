@@ -118,7 +118,7 @@ public class CameraPreview {
 //        // 获取变换矩阵的句柄
 //        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
 //        //纹理位置句柄
-//        maTexCoordHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoord");
+//        mTexCoordHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoord");
 
         mHPosition= GLES20.glGetAttribLocation(mProgram, "vPosition");
         mHCoord=GLES20.glGetAttribLocation(mProgram,"vCoord");

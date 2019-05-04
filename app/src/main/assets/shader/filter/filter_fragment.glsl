@@ -6,7 +6,7 @@ uniform int vChangeType;//【应用需要传类型过来，对不同类型做不
 uniform vec3 vChangeColor;
 
 uniform float uXY;//屏幕宽高比
-varying vec4 gPosition; //顶点着色器把坐标传过来
+varying vec4 vPosition; //顶点着色器把坐标传过来
 
 void modifyColor(vec4 color){
     color.r=max(min(color.r, 1.0), 0.0);
@@ -44,7 +44,7 @@ void main() {
         gl_FragColor=nColor;
     } else if (vChangeType==4){ //放大镜效果,
         //到中心点距离
-        float dis=distance(vec2(gPosition.x, gPosition.y), vec2(0, 0));
+        float dis=distance(vec2(vPosition.x, vPosition.y), vec2(0, 0));
         //距离在这个区块内放大，改变纹理坐标，为什么+0.25？
         if (dis<vChangeColor.b){
             nColor=texture2D(vTexture, vec2(vTextureCoord.x/2.0+0.25, vTextureCoord.y/2.0+0.25));
