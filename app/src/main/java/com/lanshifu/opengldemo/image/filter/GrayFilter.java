@@ -1,7 +1,9 @@
-package com.lanshifu.opengldemo.image;
+package com.lanshifu.opengldemo.image.filter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+
+import com.lanshifu.opengldemo.utils.ShaderManager;
 
 /**
  * 黑白滤镜比较好处理
@@ -13,9 +15,7 @@ public class GrayFilter extends BaseFilter {
     }
 
     @Override
-    protected String getFragmentCode() {
-        return "shader/filter/filter_fragment_gray.glsl";
+    protected ShaderManager.Param getProgram(){
+        return ShaderManager.getParam(ShaderManager.GRAY_SHADER);
     }
-
-
 }

@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 import com.lanshifu.opengldemo.R;
 import com.lanshifu.opengldemo.image.FilterRenderer;
+import com.lanshifu.opengldemo.utils.ShaderManager;
 
 public class PreviewActivity extends AppCompatActivity {
 
@@ -35,25 +36,25 @@ public class PreviewActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mDefault:
-                mFilterRenderer.setType(FilterRenderer.Filter.NONE);
+                mFilterRenderer.setType(ShaderManager.BASE_SHADER);
                 break;
             case R.id.mGray:
-                mFilterRenderer.setType(FilterRenderer.Filter.GRAY);
+                mFilterRenderer.setType(ShaderManager.GRAY_SHADER);
                 break;
             case R.id.mCool:
-                mFilterRenderer.setType(FilterRenderer.Filter.COOL);
+                mFilterRenderer.setType(ShaderManager.COOL_SHADER);
                 break;
             case R.id.mWarm:
-                mFilterRenderer.setType(FilterRenderer.Filter.WARM);
+                mFilterRenderer.setType(ShaderManager.WARM_SHADER);
                 break;
             case R.id.mBlur:
-                mFilterRenderer.setType(FilterRenderer.Filter.BLUR);
+                mFilterRenderer.setType(ShaderManager.BUZZY_SHADER);
                 break;
             case R.id.mMagn:
-                mFilterRenderer.setType(FilterRenderer.Filter.MAGN);
+                mFilterRenderer.setType(ShaderManager.ZOOM_SHADER);
                 break;
             case R.id.mFour:
-                mFilterRenderer.setType(FilterRenderer.Filter.FOUR);
+                mFilterRenderer.setType(ShaderManager.FOUR_SHADER);
                 break;
 
 //                mGLView.getRender().getFilter().setHalf(isHalf);
@@ -66,7 +67,6 @@ public class PreviewActivity extends AppCompatActivity {
     private void setSimpleRender() {
         //图片
         mFilterRenderer = new FilterRenderer(this);
-        mFilterRenderer.setType(FilterRenderer.Filter.NONE);
         mGLSurfaceView.setRenderer(mFilterRenderer);
     }
 }

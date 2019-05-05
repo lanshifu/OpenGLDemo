@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.lanshifu.opengldemo.R;
+import com.lanshifu.opengldemo.utils.ShaderManager;
 
 import java.io.IOException;
 
@@ -57,26 +58,33 @@ public class ImageFilterActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mDefault:
-                mFilterRenderer.setType(FilterRenderer.Filter.NONE);
+                mFilterRenderer.setType(ShaderManager.BASE_SHADER);
                 break;
             case R.id.mGray:
-                mFilterRenderer.setType(FilterRenderer.Filter.GRAY);
+                mFilterRenderer.setType(ShaderManager.GRAY_SHADER);
                 break;
             case R.id.mCool:
-                mFilterRenderer.setType(FilterRenderer.Filter.COOL);
+                mFilterRenderer.setType(ShaderManager.COOL_SHADER);
                 break;
             case R.id.mWarm:
-                mFilterRenderer.setType(FilterRenderer.Filter.WARM);
+                mFilterRenderer.setType(ShaderManager.WARM_SHADER);
                 break;
             case R.id.mBlur:
-                mFilterRenderer.setType(FilterRenderer.Filter.BLUR);
+                mFilterRenderer.setType(ShaderManager.BUZZY_SHADER);
                 break;
             case R.id.mMagn:
-                mFilterRenderer.setType(FilterRenderer.Filter.MAGN);
+                mFilterRenderer.setType(ShaderManager.ZOOM_SHADER);
                 break;
             case R.id.mFour:
-                mFilterRenderer.setType(FilterRenderer.Filter.FOUR);
+                mFilterRenderer.setType(ShaderManager.FOUR_SHADER);
                 break;
+
+                case R.id.light:
+                mFilterRenderer.setType(ShaderManager.LIGHT_SHADER);
+                break;
+
+//                mGLView.getRender().getFilter().setHalf(isHalf);
+//                mGLView.requestRender();
         }
         return super.onOptionsItemSelected(item);
 

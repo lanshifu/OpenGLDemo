@@ -4,12 +4,19 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import com.lanshifu.opengldemo.BaseRenderer;
-import com.lanshifu.opengldemo.renderer.glview.Square03;
+import com.lanshifu.opengldemo.image.filter.BaseFilter;
+import com.lanshifu.opengldemo.image.filter.BuzzyFilter;
+import com.lanshifu.opengldemo.image.filter.CoolFilter;
+import com.lanshifu.opengldemo.image.filter.FourFilter;
+import com.lanshifu.opengldemo.image.filter.GrayFilter;
+import com.lanshifu.opengldemo.image.filter.LightFilter;
+import com.lanshifu.opengldemo.image.filter.WarmFilter;
+import com.lanshifu.opengldemo.image.filter.ZoomFilter;
+import com.lanshifu.opengldemo.utils.ShaderManager;
 
 import java.io.IOException;
 
@@ -22,16 +29,9 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class FilterRenderer extends BaseRenderer {
 
-    private static final String TAG = "DemoRenderer";
-
-
-    private Square03 mSquare03;
+    private static final String TAG = "FilterRenderer";
 
     BaseFilter mFilterView;
-
-    public void setFilterView(BaseFilter filterView) {
-        mFilterView = filterView;
-    }
 
     /**
      * 投影和相机视图相关矩阵
@@ -56,7 +56,10 @@ public class FilterRenderer extends BaseRenderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-//        mSquare03 = new Square03(mContext, mBitmap);
+
+        //着色器初始化，缓存操作
+        ShaderManager.init(mContext);
+
 
         try {
             mBitmap = BitmapFactory.decodeStream(mContext.getResources().getAssets().open("picture.png"));
@@ -69,8 +72,8 @@ public class FilterRenderer extends BaseRenderer {
         }
 
 
-
-        mFilterView = new GrayFilter(mContext, mBitmap);
+        //暂时传Bitmap过去，后面涉及到相机再修改一下
+        mFilterView = new BaseFilter(mContext, mBitmap);
 
         // 设置默认背景颜色，可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
@@ -120,21 +123,11 @@ public class FilterRenderer extends BaseRenderer {
     @Override
     public void onDrawFrame(GL10 gl) {
 
-        if (filterChange) {
+        if (mFilterChange) {
             updateFilterView();
         }
         // Redraw background color 重绘背景
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-//        mTriangleTexture.drawSelf();
-
-//        mGLTriangle04.setMvpMatrix(mMVPMatrix);
-//        mGLTriangle04.draw();
-
-//        mSquare03.setMvpMatrix(mMVPMatrix);
-//        mSquare03.setMxy(mWH);
-//        mSquare03.setFilter(Filter.NONE);
-//        mSquare03.draw();
 
         if (mFilterView == null) {
             Log.e(TAG, "onDrawFrame: mFilterView == null");
@@ -147,30 +140,58 @@ public class FilterRenderer extends BaseRenderer {
     }
 
 
+    boolean mFilterChange = false;
 
-    boolean filterChange = false;
-    Filter filter;
+    int mFilterType;
 
-    public void setType(Filter filter) {
-        if (this.filter == filter){
-            Log.d(TAG, "setType: this.filter == filter");
+    public void setType(int filterType) {
+        if (this.mFilterType == filterType) {
+            Log.d(TAG, "setType: this.mFilterType == mFilterType");
             return;
         }
-        this.filter = filter;
-        filterChange = true;
+
+        this.mFilterType = filterType;
+        mFilterChange = true;
 
     }
 
     void updateFilterView() {
 
         mFilterView = null;
-        switch (this.filter) {
-            case GRAY:
+        switch (this.mFilterType) {
+            case ShaderManager.GRAY_SHADER:
                 mFilterView = new GrayFilter(mContext, mBitmap);
                 break;
-            case NONE:
+            case ShaderManager.BASE_SHADER:
                 mFilterView = new BaseFilter(mContext, mBitmap);
                 break;
+
+            case ShaderManager.WARM_SHADER:
+                mFilterView = new WarmFilter(mContext, mBitmap);
+                break;
+
+            case ShaderManager.COOL_SHADER:
+                mFilterView = new CoolFilter(mContext, mBitmap);
+                break;
+
+            case ShaderManager.BUZZY_SHADER:
+                mFilterView = new BuzzyFilter(mContext, mBitmap);
+                break;
+
+            case ShaderManager.FOUR_SHADER:
+                mFilterView = new FourFilter(mContext, mBitmap);
+                break;
+
+            case ShaderManager.ZOOM_SHADER:
+                mFilterView = new ZoomFilter(mContext, mBitmap);
+                break;
+
+
+            case ShaderManager.LIGHT_SHADER:
+                mFilterView = new LightFilter(mContext, mBitmap);
+                break;
+
+
             default:
                 mFilterView = new BaseFilter(mContext, mBitmap);
                 break;
@@ -178,43 +199,15 @@ public class FilterRenderer extends BaseRenderer {
 
         }
 
-        filterChange = false;
+        mFilterChange = false;
     }
 
     @Override
     public void onDestroy() {
-        if (mFilterView != null){
+        if (mFilterView != null) {
             mFilterView.onDestroy();
         }
     }
 
-
-    public enum Filter {
-
-        NONE(0, new float[]{0.0f, 0.0f, 0.0f}),
-        GRAY(1, new float[]{0.299f, 0.587f, 0.114f}),
-        COOL(2, new float[]{0.0f, 0.0f, 0.5f}), //冷就是多加点蓝
-        WARM(2, new float[]{0.2f, 0.2f, 0.0f}), //暖就是多加点红跟绿
-        BLUR(3, new float[]{0.002f, 0.002f, 0.002f}), //距离越大越模糊
-        MAGN(4, new float[]{0.0f, 0.0f, 0.4f}),
-        FOUR(5, new float[]{0.0f, 0.0f, 0.0f}); //四分镜
-
-        private int vChangeType;
-        private float[] data;
-
-        Filter(int vChangeType, float[] data) {
-            this.vChangeType = vChangeType;
-            this.data = data;
-        }
-
-        public int getType() {
-            return vChangeType;
-        }
-
-        public float[] data() {
-            return data;
-        }
-
-    }
 
 }

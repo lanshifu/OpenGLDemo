@@ -1,4 +1,4 @@
-package com.lanshifu.opengldemo.image;
+package com.lanshifu.opengldemo.image.filter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,6 +8,7 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.lanshifu.opengldemo.utils.GLUtil;
+import com.lanshifu.opengldemo.utils.ShaderManager;
 
 import java.nio.FloatBuffer;
 
@@ -66,7 +67,6 @@ public class BaseFilter {
     }
 
     private void initVertext() {
-
         float vertices[] = new float[]{
                 -1, 1, 0,
                 -1, -1, 0,
@@ -88,21 +88,27 @@ public class BaseFilter {
     }
 
     private void initShder() {
-        Log.d(TAG, "initShder: start");
         //获取程序，封装了加载、链接等操作
-        vertexShaderCode = GLUtil.loadFromAssetsFile(getVertexCode(), mContext.getResources());
-        fragmentShaderCode = GLUtil.loadFromAssetsFile(getFragmentCode(), mContext.getResources());
-        mProgram = GLUtil.createProgram(vertexShaderCode, fragmentShaderCode);
+        ShaderManager.Param param = getProgram();
+        setProgram(param);
 
-        /***1.获取句柄*/
-        // 获取顶点着色器的位置的句柄（这里可以理解为当前绘制的顶点位置）
-        vPositionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
+    }
+
+    private void setProgram(ShaderManager.Param param){
+        mProgram = param.program;
+        vPositionHandle = param.positionHandle;
         // 获取变换矩阵的句柄
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mMVPMatrixHandle = param.mMVPMatrixHandle;
         //纹理位置句柄
-        mTexCoordHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoord");
+        mTexCoordHandle = param.mTexCoordHandle;
+    }
 
-        Log.d(TAG, "initShder: end vPositionHandle= " + mTexCoordHandle + ",mTexCoordHandle=" + mTexCoordHandle + ",mMVPMatrixHandle=" + mMVPMatrixHandle);
+    /**
+     * 滤镜子类重写这个方法，加载不同的OpenGL程序
+     * @return
+     */
+    protected ShaderManager.Param getProgram(){
+        return ShaderManager.getParam(ShaderManager.BASE_SHADER);
     }
 
 
@@ -140,11 +146,10 @@ public class BaseFilter {
                 mBitmap, //纹理图像
                 0 //纹理边框尺寸
         );
-        Log.d(TAG, "initTexture: end,mTextureId="+textures[0]);
+        Log.d(TAG, "initTexture: end,mTextureId=" + textures[0]);
 
         return textures[0];
     }
-
 
 
     public void draw() {
@@ -189,16 +194,4 @@ public class BaseFilter {
     }
 
 
-    /**
-     * 子类可以更改着色器路径，达到不同效果
-     *
-     * @return
-     */
-    protected String getVertexCode() {
-        return "shader/filter/filter_base_vertex.glsl";
-    }
-
-    protected String getFragmentCode() {
-        return "shader/filter/filter_base_fragment.glsl";
-    }
 }

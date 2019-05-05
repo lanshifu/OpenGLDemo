@@ -49,15 +49,15 @@ public class Square03 {
 
     //变换矩阵，提供set方法
     private float[] mvpMatrix = new float[16];
-    private FilterRenderer.Filter mFilter;
+//    private FilterRenderer.Filter mFilter;
     private int mTextureId;
 
     public void setMvpMatrix(float[] mvpMatrix) {
         this.mvpMatrix = mvpMatrix;
     }
-    public void setFilter(FilterRenderer.Filter filter) {
-        this.mFilter = filter;
-    }
+//    public void setFilter(FilterRenderer.Filter filter) {
+//        this.mFilter = filter;
+//    }
 
     private Context mContext;
     private Bitmap mBitmap;
@@ -98,7 +98,7 @@ public class Square03 {
 
     private void initShder() {
         //获取程序，封装了加载、链接等操作
-        vertexShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_base_vertex.glsl", mContext.getResources());
+        vertexShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_vertex_base.glsl", mContext.getResources());
         fragmentShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_fragment.glsl", mContext.getResources());
 
         mProgram = GLUtil.createProgram(vertexShaderCode, fragmentShaderCode);
@@ -184,8 +184,8 @@ public class Square03 {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
 
         /***传递滤镜类型和颜色过去，片元着色器会根据类型做不同处理，原本的ARG通道分别乘以传过去的ARG，相加得到一个新的值，作为新的ARG的值*/
-        GLES20.glUniform1i(hChangeType,mFilter.getType());
-        GLES20.glUniform3fv(hChangeColor,1,mFilter.data(),0);
+//        GLES20.glUniform1i(hChangeType,mFilter.getType());
+//        GLES20.glUniform3fv(hChangeColor,1,mFilter.data(),0);
         GLES20.glUniform1f(uXY,mxy);
 //        GLES20.glUniform3fv(hChangeColor,2,new float[]{0.0f,0.0f,0.1f},0);
 
