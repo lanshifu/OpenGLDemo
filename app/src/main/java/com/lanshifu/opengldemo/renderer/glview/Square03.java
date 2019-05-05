@@ -6,7 +6,6 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.util.Log;
 
-import com.lanshifu.opengldemo.image.FilterRenderer;
 import com.lanshifu.opengldemo.utils.GLUtil;
 
 import java.nio.FloatBuffer;
@@ -98,8 +97,8 @@ public class Square03 {
 
     private void initShder() {
         //获取程序，封装了加载、链接等操作
-        vertexShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_vertex_base.glsl", mContext.getResources());
-        fragmentShaderCode = GLUtil.loadFromAssetsFile("shader/filter/filter_fragment.glsl", mContext.getResources());
+        vertexShaderCode = GLUtil.loadFromAssetsFile("shader/image/filter/filter_vertex_base.glsl", mContext.getResources());
+        fragmentShaderCode = GLUtil.loadFromAssetsFile("shader/image/filter/filter_fragment.glsl", mContext.getResources());
 
         mProgram = GLUtil.createProgram(vertexShaderCode, fragmentShaderCode);
         /***1.获取句柄*/

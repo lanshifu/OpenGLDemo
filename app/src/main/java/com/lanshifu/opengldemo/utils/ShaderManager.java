@@ -27,28 +27,28 @@ public class ShaderManager {
 
         mParamSparseArray = new SparseArray<>();
 
-        insertParam(BASE_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_base.glsl"));
+        insertParam(BASE_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_base.glsl"));
 
-        insertParam(GRAY_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_gray.glsl"));
+        insertParam(GRAY_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_gray.glsl"));
 
-        insertParam(WARM_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_warm.glsl"));
+        insertParam(WARM_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_warm.glsl"));
 
-        insertParam(COOL_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_cool.glsl"));
+        insertParam(COOL_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_cool.glsl"));
 
-        insertParam(BUZZY_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_buzzy.glsl"));
-        insertParam(FOUR_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_four.glsl"));
+        insertParam(BUZZY_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_buzzy.glsl"));
+        insertParam(FOUR_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_four.glsl"));
 
-        insertParam(ZOOM_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_zoom.glsl"));
+        insertParam(ZOOM_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_zoom.glsl"));
 
-        insertParam(LIGHT_SHADER, GLUtil.loadFromAssetsFile(context, "shader/filter/filter_vertex_base.glsl")
-                , GLUtil.loadFromAssetsFile(context, "shader/filter/filter_fragment_light.glsl"));
+        insertParam(LIGHT_SHADER, GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_vertex_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/image/filter/filter_fragment_light.glsl"));
 
 
     }
