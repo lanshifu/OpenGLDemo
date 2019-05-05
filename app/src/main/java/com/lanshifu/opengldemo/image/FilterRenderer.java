@@ -56,7 +56,7 @@ public class FilterRenderer extends BaseRenderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-        mSquare03 = new Square03(mContext, mBitmap);
+//        mSquare03 = new Square03(mContext, mBitmap);
 
         try {
             mBitmap = BitmapFactory.decodeStream(mContext.getResources().getAssets().open("picture.png"));
@@ -70,7 +70,7 @@ public class FilterRenderer extends BaseRenderer {
 
 
 
-//        mFilterView = new BaseFilter(mContext, mBitmap);
+        mFilterView = new GrayFilter(mContext, mBitmap);
 
         // 设置默认背景颜色，可以在onDrawFrame中重新设置
         GLES20.glClearColor(1.0f, 0.0f, 0, 1.0f);
@@ -97,7 +97,8 @@ public class FilterRenderer extends BaseRenderer {
         mWH = w / (float) h;
         float sWidthHeight = width / (float) height;
         if (width > height) {
-            if (mWH > sWidthHeight) {
+            //横屏
+            if (mWH > sWidthHeight) { //图片太大要压缩
                 Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight * mWH, sWidthHeight * mWH, -1, 1, 3, 7);
             } else {
                 Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / mWH, sWidthHeight / mWH, -1, 1, 3, 7);
@@ -113,9 +114,6 @@ public class FilterRenderer extends BaseRenderer {
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 7.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         //计算变换矩阵
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectMatrix, 0, mViewMatrix, 0);
-
-
-
 
     }
 
@@ -133,10 +131,10 @@ public class FilterRenderer extends BaseRenderer {
 //        mGLTriangle04.setMvpMatrix(mMVPMatrix);
 //        mGLTriangle04.draw();
 
-        mSquare03.setMvpMatrix(mMVPMatrix);
-        mSquare03.setMxy(mWH);
-        mSquare03.setFilter(Filter.NONE);
-        mSquare03.draw();
+//        mSquare03.setMvpMatrix(mMVPMatrix);
+//        mSquare03.setMxy(mWH);
+//        mSquare03.setFilter(Filter.NONE);
+//        mSquare03.draw();
 
         if (mFilterView == null) {
             Log.e(TAG, "onDrawFrame: mFilterView == null");
@@ -167,7 +165,7 @@ public class FilterRenderer extends BaseRenderer {
 
         mFilterView = null;
         switch (this.filter) {
-            case BLUR:
+            case GRAY:
                 mFilterView = new GrayFilter(mContext, mBitmap);
                 break;
             case NONE:

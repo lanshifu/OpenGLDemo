@@ -6,6 +6,8 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
+import com.lanshifu.opengldemo.utils.MatrixUtils;
+
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -28,6 +30,7 @@ import static android.opengl.GLES20.glVertexAttribPointer;
 import static android.opengl.GLES20.glViewport;
 import static javax.microedition.khronos.opengles.GL10.GL_FLOAT;
 import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLES;
+import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLE_STRIP;
 
 public class CameraV2Renderer implements GLSurfaceView.Renderer   {
     public static final String TAG = "Filter_CameraV2Renderer";
@@ -39,7 +42,8 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
     private SurfaceTexture mSurfaceTexture;
     private float[] transformMatrix = new float[16];
     private FilterEngine mFilterEngine;
-    private FloatBuffer mDataBuffer;
+    private FloatBuffer mVertextBuffer;
+    private FloatBuffer mFragmentBuffer;
     private int mShaderProgram = -1;
     private int aPositionLocation = -1;
     private int aTextureCoordLocation = -1;
@@ -56,38 +60,43 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+
+        //1、编译链接
         mOESTextureId = Utils.createOESTextureObject();
         mFilterEngine = new FilterEngine(mOESTextureId, mContext);
-        mDataBuffer = mFilterEngine.getBuffer();
+        mVertextBuffer = mFilterEngine.getVertexmBuffer();
+        mFragmentBuffer = mFilterEngine.getFragmentBuffer();
         mShaderProgram = mFilterEngine.getShaderProgram();
+
+        // TODO: 2019/4/30 什么意思
         glGenFramebuffers(1, mFBOIds, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0]);
         Log.i(TAG, "onSurfaceCreated: mFBOId: " + mFBOIds[0]);
 
+        //2、获取句柄
         aPositionLocation = glGetAttribLocation(mShaderProgram, FilterEngine.POSITION_ATTRIBUTE);
         aTextureCoordLocation = glGetAttribLocation(mShaderProgram, FilterEngine.TEXTURE_COORD_ATTRIBUTE);
         uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_MATRIX_UNIFORM);
         uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_SAMPLER_UNIFORM);
-        Log.d(TAG, "onSurfaceCreated: aPositionLocation= " + aPositionLocation);
-        Log.d(TAG, "onSurfaceCreated: aTextureCoordLocation= " + aTextureCoordLocation);
-        Log.d(TAG, "onSurfaceCreated: uTextureMatrixLocation= " + uTextureMatrixLocation);
-        Log.d(TAG, "onSurfaceCreated: uTextureSamplerLocation= " + uTextureSamplerLocation);
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         glViewport(0, 0, width, height);
         Log.i(TAG, "onSurfaceChanged: " + width + ", " + height);
+
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
         Long t1 = System.currentTimeMillis();
         if (mSurfaceTexture != null) {
+            //surfaceTexture.updateTexImage()更新预览上的图像
             mSurfaceTexture.updateTexImage();
             mSurfaceTexture.getTransformMatrix(transformMatrix);
         }
 
+        //预览在这里启动
         if (!bIsPreviewStarted) {
             bIsPreviewStarted = initSurfaceTexture();
             bIsPreviewStarted = true;
@@ -104,14 +113,12 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
         glUniform1i(uTextureSamplerLocation, 0);
         glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0);
 
-        if (mDataBuffer != null) {
-            mDataBuffer.position(0);
+        if (mVertextBuffer != null) {
             glEnableVertexAttribArray(aPositionLocation);
-            glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, mDataBuffer);
+            glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 2*4, mVertextBuffer);
 
-            mDataBuffer.position(2);
             glEnableVertexAttribArray(aTextureCoordLocation);
-            glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, mDataBuffer);
+            glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 2*4, mFragmentBuffer);
         }
 
         //glDrawElements(GL_TRIANGLE_FAN, 6,GL_UNSIGNED_INT, 0);
@@ -131,6 +138,8 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
             return false;
         }
         mSurfaceTexture = new SurfaceTexture(mOESTextureId);
+        //和图片不同的是，图片数据是相同的，而摄像头数据是变换的，所以每当摄像头有新的数据来时，我们需要通过surfaceTexture.updateTexImage()更新预览上的图像
+        // updateTexImage 不应该在OnFrameAvailableLister的回调方法中直接调用，而应该在onDrawFrame中执行。而调用requestRender，可以触发onDrawFrame
         mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {

@@ -12,6 +12,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -39,6 +40,7 @@ public class CameraV2 {
     private CaptureRequest.Builder mCaptureRequestBuilder;
     private CaptureRequest mCaptureRequest;
     private CameraCaptureSession mCameraCaptureSession;
+    private String[] mCameraIdList;
 
     public CameraV2(Activity activity) {
         mActivity = activity;
@@ -48,7 +50,9 @@ public class CameraV2 {
     public String setupCamera(int width, int height) {
         CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
         try {
-            for (String id : cameraManager.getCameraIdList()) {
+            mCameraIdList = cameraManager.getCameraIdList();
+            Log.d(TAG, "setupCamera: mCameraIdList:"+mCameraIdList.length);
+            for (String id : mCameraIdList) {
                 CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(id);
                 if (characteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
                     continue;
@@ -64,6 +68,22 @@ public class CameraV2 {
         return mCameraId;
     }
 
+
+    public boolean setCameraId(String cameraId){
+        for (String containCamera : mCameraIdList) {
+            if (containCamera.equals(cameraId)){
+                mCameraId = cameraId;
+                return true;
+            }
+        }
+        Log.e(TAG, "setCameraId: camera id not exit" );
+        return false;
+    }
+
+    public String getCameraId(){
+        return mCameraId;
+    }
+
     public void startCameraThread() {
         mCameraThread = new HandlerThread("CameraThread");
         mCameraThread.start();
@@ -73,7 +93,9 @@ public class CameraV2 {
     public boolean openCamera() {
         CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
         try {
-            if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                mActivity.requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest
+                        .permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return false;
             }
             cameraManager.openCamera(mCameraId, mStateCallback, mCameraHandler);
@@ -83,6 +105,14 @@ public class CameraV2 {
         }
         return true;
     }
+
+    public void closeCamea(){
+        if (mCameraDevice != null){
+            mCameraDevice.close();
+            mCameraDevice = null;
+        }
+    }
+
 
     public CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -157,6 +187,10 @@ public class CameraV2 {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    public void stopPreview(){
+
     }
 
 

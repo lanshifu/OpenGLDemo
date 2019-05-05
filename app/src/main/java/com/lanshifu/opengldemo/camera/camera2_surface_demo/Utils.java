@@ -17,9 +17,14 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class Utils {
 
+    /**
+     * 相机预览使用EXTERNAL_OES纹理，创建方式与2D纹理创建基本相同
+     * @return
+     */
     public static int createOESTextureObject() {
         int[] tex = new int[1];
         GLES20.glGenTextures(1, tex, 0);
+        //于我们创建的是扩展纹理，所以绑定的时候我们也需要绑定到扩展纹理上才可以正常使用，
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, tex[0]);
         GLES20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
                 GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);

@@ -5,13 +5,11 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 
 import com.lanshifu.opengldemo.R;
-import com.lanshifu.opengldemo.utils.GLUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
 import static android.opengl.GLES20.GL_FLOAT;
 import static android.opengl.GLES20.GL_FRAGMENT_SHADER;
 import static android.opengl.GLES20.GL_TRIANGLES;
@@ -19,16 +17,13 @@ import static android.opengl.GLES20.GL_VERTEX_SHADER;
 import static android.opengl.GLES20.glActiveTexture;
 import static android.opengl.GLES20.glAttachShader;
 import static android.opengl.GLES20.glBindTexture;
-import static android.opengl.GLES20.glCompileShader;
 import static android.opengl.GLES20.glCreateProgram;
-import static android.opengl.GLES20.glCreateShader;
 import static android.opengl.GLES20.glDrawArrays;
 import static android.opengl.GLES20.glEnableVertexAttribArray;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetError;
 import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glLinkProgram;
-import static android.opengl.GLES20.glShaderSource;
 import static android.opengl.GLES20.glUniform1i;
 import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
@@ -41,7 +36,8 @@ public class FilterEngine {
     private static FilterEngine filterEngine = null;
 
     private Context mContext;
-    private FloatBuffer mBuffer;
+    private FloatBuffer mVertexmBuffer;
+    private FloatBuffer mFragmentBuffer;
     private int mOESTextureId = -1;
     private int vertexShader = -1;
     private int fragmentShader = -1;
@@ -56,7 +52,8 @@ public class FilterEngine {
     public FilterEngine(int OESTextureId, Context context) {
         mContext = context;
         mOESTextureId = OESTextureId;
-        mBuffer = createBuffer(vertexData);
+        mVertexmBuffer = createBuffer(vertexData);
+        mFragmentBuffer = createBuffer(fragmentData);
 
         vertexShader = loadShader(GL_VERTEX_SHADER, Utils.readShaderFromResource(mContext, R.raw.base_vertex_shader));
         fragmentShader = loadShader(GL_FRAGMENT_SHADER, Utils.readShaderFromResource(mContext, R.raw.base_fragment_shader));
@@ -90,13 +87,24 @@ public class FilterEngine {
         return filterEngine;
     }*/
 
+    //两个三角形顶点
     private static final float[] vertexData = {
-            1f, 1f, 1f, 1f,
-            -1f, 1f, 0f, 1f,
-            -1f, -1f, 0f, 0f,
-            1f, 1f, 1f, 1f,
-            -1f, -1f, 0f, 0f,
-            1f, -1f, 1f, 0f
+            1f, 1f,
+            -1f, 1f,
+            -1f, -1f,
+            1f, 1f,
+            -1f, -1f,
+            1f, -1f,
+    };
+
+    //对应纹理坐标
+    private static final float[] fragmentData = {
+            1f, 1f,
+            0f, 1f,
+            0f, 0f,
+            1f, 1f,
+            0f, 0f,
+            1f, 0f
     };
 
     public static final String POSITION_ATTRIBUTE = "aPosition";
@@ -123,14 +131,12 @@ public class FilterEngine {
         glUniform1i(uTextureSamplerLocation, 0);
         glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0);
 
-        if (mBuffer != null) {
-            mBuffer.position(0);
+        if (mVertexmBuffer != null) {
             glEnableVertexAttribArray(aPositionLocation);
-            glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, mBuffer);
+            glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 16, mVertexmBuffer);
 
-            mBuffer.position(2);
             glEnableVertexAttribArray(aTextureCoordLocation);
-            glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, mBuffer);
+            glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 16, mFragmentBuffer);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
@@ -140,8 +146,12 @@ public class FilterEngine {
         return mShaderProgram;
     }
 
-    public FloatBuffer getBuffer() {
-        return mBuffer;
+    public FloatBuffer getVertexmBuffer() {
+        return mVertexmBuffer;
+    }
+
+    public FloatBuffer getFragmentBuffer() {
+        return mFragmentBuffer;
     }
 
     public int getOESTextureId() {

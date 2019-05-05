@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.lanshifu.opengldemo.camera.Camera2Activity;
-import com.lanshifu.opengldemo.camera.Camera2Demo_TextureView_Activity;
 import com.lanshifu.opengldemo.camera.camera2_surface_demo.Camera2Demo_SurfaceView_Activity;
 import com.lanshifu.opengldemo.image.ImageFilterActivity;
 

@@ -44,8 +44,6 @@ public class BaseFilter {
     protected int mTexCoordHandle;
 
     //变换矩阵，提供set方法
-    private final float[] mProjectMatrix = new float[16];
-    private final float[] mViewMatrix = new float[16];
     private float[] mvpMatrix = new float[16];
 
     protected int mTextureId;
