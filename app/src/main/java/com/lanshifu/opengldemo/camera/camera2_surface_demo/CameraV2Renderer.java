@@ -2,56 +2,40 @@ package com.lanshifu.opengldemo.camera.camera2_surface_demo;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.opengl.GLES11Ext;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
-import com.lanshifu.opengldemo.utils.MatrixUtils;
-
-import java.nio.FloatBuffer;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2BaseFilter;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterBuzz;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterCool;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterFour;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterGray;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterLight;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterWarm;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterZoom;
+import com.lanshifu.opengldemo.utils.GLUtil;
+import com.lanshifu.opengldemo.utils.ShaderManager;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import static android.opengl.GLES10.glActiveTexture;
 import static android.opengl.GLES10.glClearColor;
-import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-import static android.opengl.GLES20.GL_FRAMEBUFFER;
-import static android.opengl.GLES20.glBindFramebuffer;
-import static android.opengl.GLES20.glBindTexture;
-import static android.opengl.GLES20.glDrawArrays;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGenFramebuffers;
-import static android.opengl.GLES20.glGetAttribLocation;
-import static android.opengl.GLES20.glGetUniformLocation;
-import static android.opengl.GLES20.glUniform1i;
-import static android.opengl.GLES20.glUniformMatrix4fv;
-import static android.opengl.GLES20.glVertexAttribPointer;
 import static android.opengl.GLES20.glViewport;
-import static javax.microedition.khronos.opengles.GL10.GL_FLOAT;
-import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLES;
-import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLE_STRIP;
 
-public class CameraV2Renderer implements GLSurfaceView.Renderer   {
-    public static final String TAG = "Filter_CameraV2Renderer";
+public class CameraV2Renderer implements GLSurfaceView.Renderer {
+    public static final String TAG = "CameraV2Renderer";
     private Context mContext;
-    CameraV2GLSurfaceView mCameraV2GLSurfaceView;
+    GLSurfaceView mCameraV2GLSurfaceView;
     CameraV2 mCamera;
     boolean bIsPreviewStarted;
-    private int mOESTextureId = -1;
+    private int mTextureId = -1;
     private SurfaceTexture mSurfaceTexture;
     private float[] transformMatrix = new float[16];
-    private FilterEngine mFilterEngine;
-    private FloatBuffer mVertextBuffer;
-    private FloatBuffer mFragmentBuffer;
-    private int mShaderProgram = -1;
-    private int aPositionLocation = -1;
-    private int aTextureCoordLocation = -1;
-    private int uTextureMatrixLocation = -1;
-    private int uTextureSamplerLocation = -1;
     private int[] mFBOIds = new int[1];
 
-    public void init(CameraV2GLSurfaceView surfaceView, CameraV2 camera, boolean isPreviewStarted, Context context) {
+    Camera2BaseFilter mCamera2BaseFilter;
+
+    public void init(GLSurfaceView surfaceView, CameraV2 camera, boolean isPreviewStarted, Context context) {
         mContext = context;
         mCameraV2GLSurfaceView = surfaceView;
         mCamera = camera;
@@ -60,24 +44,16 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        ShaderManager.init(mContext);
+        //1、获取一个纹理id，传给
+        mTextureId = GLUtil.getOESTextureId();
+        mCamera2BaseFilter = new Camera2BaseFilter(mContext, mTextureId);
 
-        //1、编译链接
-        mOESTextureId = Utils.createOESTextureObject();
-        mFilterEngine = new FilterEngine(mOESTextureId, mContext);
-        mVertextBuffer = mFilterEngine.getVertexmBuffer();
-        mFragmentBuffer = mFilterEngine.getFragmentBuffer();
-        mShaderProgram = mFilterEngine.getShaderProgram();
+//        // 这个应该是离频渲染用到
+//        glGenFramebuffers(1, mFBOIds, 0);
+//        glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0]);
+//        Log.i(TAG, "onSurfaceCreated: mFBOId: " + mFBOIds[0]);
 
-        // TODO: 2019/4/30 什么意思
-        glGenFramebuffers(1, mFBOIds, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0]);
-        Log.i(TAG, "onSurfaceCreated: mFBOId: " + mFBOIds[0]);
-
-        //2、获取句柄
-        aPositionLocation = glGetAttribLocation(mShaderProgram, FilterEngine.POSITION_ATTRIBUTE);
-        aTextureCoordLocation = glGetAttribLocation(mShaderProgram, FilterEngine.TEXTURE_COORD_ATTRIBUTE);
-        uTextureMatrixLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_MATRIX_UNIFORM);
-        uTextureSamplerLocation = glGetUniformLocation(mShaderProgram, FilterEngine.TEXTURE_SAMPLER_UNIFORM);
     }
 
     @Override
@@ -93,6 +69,7 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
         if (mSurfaceTexture != null) {
             //surfaceTexture.updateTexImage()更新预览上的图像
             mSurfaceTexture.updateTexImage();
+            //获取变换矩阵
             mSurfaceTexture.getTransformMatrix(transformMatrix);
         }
 
@@ -102,31 +79,15 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
             bIsPreviewStarted = true;
             return;
         }
+        
+        if (mFilterChange){
+            updateFilterView();
+        }
 
         //glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        mCamera2BaseFilter.draw(transformMatrix);
 
-
-
-        glActiveTexture(GL_TEXTURE_EXTERNAL_OES);
-        glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mOESTextureId);
-        glUniform1i(uTextureSamplerLocation, 0);
-        glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0);
-
-        if (mVertextBuffer != null) {
-            glEnableVertexAttribArray(aPositionLocation);
-            glVertexAttribPointer(aPositionLocation, 2, GL_FLOAT, false, 2*4, mVertextBuffer);
-
-            glEnableVertexAttribArray(aTextureCoordLocation);
-            glVertexAttribPointer(aTextureCoordLocation, 2, GL_FLOAT, false, 2*4, mFragmentBuffer);
-        }
-
-        //glDrawElements(GL_TRIANGLE_FAN, 6,GL_UNSIGNED_INT, 0);
-        //glDrawArrays(GL_TRIANGLE_FAN, 0 , 6);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        //glDrawArrays(GL_TRIANGLES, 3, 3);
-        glBindFramebuffer(GL_FRAMEBUFFER,
-                0);
         long t2 = System.currentTimeMillis();
         long t = t2 - t1;
         Log.i(TAG, "onDrawFrame: time: " + t);
@@ -137,7 +98,7 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
             Log.i(TAG, "mCamera or mGLSurfaceView is null!");
             return false;
         }
-        mSurfaceTexture = new SurfaceTexture(mOESTextureId);
+        mSurfaceTexture = new SurfaceTexture(mTextureId);
         //和图片不同的是，图片数据是相同的，而摄像头数据是变换的，所以每当摄像头有新的数据来时，我们需要通过surfaceTexture.updateTexImage()更新预览上的图像
         // updateTexImage 不应该在OnFrameAvailableLister的回调方法中直接调用，而应该在onDrawFrame中执行。而调用requestRender，可以触发onDrawFrame
         mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
@@ -147,9 +108,55 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer   {
                 mCameraV2GLSurfaceView.requestRender();
             }
         });
-        mCamera.setPreviewTexture(mSurfaceTexture);
-        mCamera.startPreview();
+
+        mCamera.startPreview(mSurfaceTexture);
         return true;
     }
 
+
+    boolean mFilterChange = false;
+    int mFilterType;
+    public void setType(int filterType) {
+        if (this.mFilterType == filterType) {
+            Log.d(TAG, "setType: this.mFilterType == mFilterType");
+            return;
+        }
+        this.mFilterType = filterType;
+        mFilterChange = true;
+    }
+
+    void updateFilterView() {
+        Log.d(TAG, "updateFilterView: ");
+        mCamera2BaseFilter = null;
+        switch (this.mFilterType) {
+            case ShaderManager.GRAY_SHADER:
+                mCamera2BaseFilter = new Camera2FilterGray(mContext, mTextureId);
+                break;
+            case ShaderManager.BASE_SHADER:
+                mCamera2BaseFilter = new Camera2BaseFilter(mContext, mTextureId);
+                break;
+            case ShaderManager.WARM_SHADER:
+                mCamera2BaseFilter = new Camera2FilterWarm(mContext, mTextureId);
+                break;
+            case ShaderManager.COOL_SHADER:
+                mCamera2BaseFilter = new Camera2FilterCool(mContext, mTextureId);
+                break;
+            case ShaderManager.BUZZY_SHADER:
+                mCamera2BaseFilter = new Camera2FilterBuzz(mContext, mTextureId);
+                break;
+            case ShaderManager.FOUR_SHADER:
+                mCamera2BaseFilter = new Camera2FilterFour(mContext, mTextureId);
+                break;
+            case ShaderManager.ZOOM_SHADER:
+                mCamera2BaseFilter = new Camera2FilterZoom(mContext, mTextureId);
+                break;
+            case ShaderManager.LIGHT_SHADER:
+                mCamera2BaseFilter = new Camera2FilterLight(mContext, mTextureId);
+                break;
+            default:
+                mCamera2BaseFilter = new Camera2BaseFilter(mContext, mTextureId);
+                break;
+        }
+        mFilterChange = false;
+    }
 }

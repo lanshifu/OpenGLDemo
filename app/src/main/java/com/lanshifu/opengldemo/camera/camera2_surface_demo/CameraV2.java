@@ -28,7 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class CameraV2 {
-    public static final String TAG = "Filter_CameraV2";
+    public static final String TAG = "CameraV2";
 
     private Activity mActivity;
     private CameraDevice mCameraDevice;
@@ -36,17 +36,26 @@ public class CameraV2 {
     private Size mPreviewSize;
     private HandlerThread mCameraThread;
     private Handler mCameraHandler;
-    private SurfaceTexture mSurfaceTexture;
     private CaptureRequest.Builder mCaptureRequestBuilder;
     private CaptureRequest mCaptureRequest;
     private CameraCaptureSession mCameraCaptureSession;
     private String[] mCameraIdList;
 
-    public CameraV2(Activity activity) {
+    public CameraV2(Activity activity,int width, int height) {
         mActivity = activity;
         startCameraThread();
+
+        setupCamera(width,height);
+
+        openCamera();
     }
 
+    /**
+     * 相机设置
+     * @param width
+     * @param height
+     * @return
+     */
     public String setupCamera(int width, int height) {
         CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
         try {
@@ -157,13 +166,14 @@ public class CameraV2 {
         return sizeMap[0];
     }
 
-    public void setPreviewTexture(SurfaceTexture surfaceTexture) {
-        mSurfaceTexture = surfaceTexture;
-    }
 
-    public void startPreview() {
-        mSurfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-        Surface surface = new Surface(mSurfaceTexture);
+    /**
+     * 启动预览，需要传 SurfaceTexture
+     * @param surfaceTexture
+     */
+    public void startPreview(SurfaceTexture surfaceTexture) {
+        surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+        Surface surface = new Surface(surfaceTexture);
         try {
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mCaptureRequestBuilder.addTarget(surface);

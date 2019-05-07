@@ -5,4 +5,25 @@
     <item android:id="@+id/switch_camera"
         app:showAsAction="always"
         android:title="切换" />
+
+    <item android:id="@+id/mDefault"
+        app:showAsAction="always"
+        android:title="原图" />
+    <item android:id="@+id/mGray"
+        app:showAsAction="always"
+        android:title="黑白" />
+    <item android:id="@+id/mCool"
+        app:showAsAction="always"
+        android:title="冷色调" />
+    <item android:id="@+id/mWarm"
+        app:showAsAction="always"
+        android:title="暖色调" />
+    <item android:id="@+id/mBlur"
+        android:title="模糊" />
+    <item android:id="@+id/mMagn"
+        android:title="放大镜" />
+    <item android:id="@+id/mFour"
+        android:title="四分镜" />
+    <item android:id="@+id/light"
+        android:title="发光" />
 </menu>

@@ -5,6 +5,5 @@ varying vec2 vTextureCoord;
 void main()
 {
   vec4 vCameraColor = texture2D(uTextureSampler, vTextureCoord);
-  float fGrayColor = (0.3*vCameraColor.r + 0.59*vCameraColor.g + 0.11*vCameraColor.b);
-  gl_FragColor = vec4(fGrayColor, fGrayColor, fGrayColor, 1.0);
+  gl_FragColor=vCameraColor + vec4(0.2, 0.2, 0.0, 0.0); //暖就是多加点红跟绿
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.opengl.Matrix;
 import android.util.Log;
 
 import com.lanshifu.opengldemo.utils.GLUtil;
@@ -20,20 +19,8 @@ import java.nio.FloatBuffer;
 public class BaseFilter {
     private static final String TAG = "BaseFilterView";
 
-    // 顶点着色器的代码
-    String vertexShaderCode;
-    // 片元着色器的代码
-    String fragmentShaderCode;
-
     private FloatBuffer mVertexBuffer;  //顶点坐标数据要转化成FloatBuffer格式
     private FloatBuffer mTexCoordBuffer;//顶点纹理坐标缓存
-
-
-    // 数组中每3个值作为一个坐标点
-    static final int COORDS_PER_VERTEX = 3;
-
-    //一个顶点有3个float，一个float是4个字节，所以一个顶点要12字节
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per mVertex
 
     //当前绘制的顶点位置句柄
     protected int vPositionHandle;
@@ -47,6 +34,7 @@ public class BaseFilter {
     //变换矩阵，提供set方法
     private float[] mvpMatrix = new float[16];
 
+    //纹理id
     protected int mTextureId;
 
     public void setMvpMatrix(float[] mvpMatrix) {
@@ -60,13 +48,14 @@ public class BaseFilter {
     public BaseFilter(Context context, Bitmap bitmap) {
         mContext = context;
         this.mBitmap = bitmap;
-
-        initVertext();
-        initShder();
+        //初始化Buffer、Shader、纹理
+        initBuffer();
+        initShader();
         initTexture();
     }
 
-    private void initVertext() {
+    //数据转换成Buffer
+    private void initBuffer() {
         float vertices[] = new float[]{
                 -1, 1, 0,
                 -1, -1, 0,
@@ -87,14 +76,12 @@ public class BaseFilter {
         mTexCoordBuffer = GLUtil.floatArray2FloatBuffer(colors);
     }
 
-    private void initShder() {
+    /**
+     * 着色器
+     */
+    private void initShader() {
         //获取程序，封装了加载、链接等操作
         ShaderManager.Param param = getProgram();
-        setProgram(param);
-
-    }
-
-    private void setProgram(ShaderManager.Param param){
         mProgram = param.program;
         vPositionHandle = param.positionHandle;
         // 获取变换矩阵的句柄
@@ -105,12 +92,12 @@ public class BaseFilter {
 
     /**
      * 滤镜子类重写这个方法，加载不同的OpenGL程序
+     *
      * @return
      */
-    protected ShaderManager.Param getProgram(){
+    protected ShaderManager.Param getProgram() {
         return ShaderManager.getParam(ShaderManager.BASE_SHADER);
     }
-
 
     protected int initTexture() {
         Log.d(TAG, "initTexture: start");
@@ -136,7 +123,7 @@ public class BaseFilter {
                 GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);//设置T轴拉伸方式
 
         if (mBitmap == null) {
-            Log.e("lxb", "initTexture: mBitmap == null");
+            Log.e(TAG, "initTexture: mBitmap == null");
             return -1;
         }
         //加载图片
@@ -150,7 +137,6 @@ public class BaseFilter {
 
         return textures[0];
     }
-
 
     public void draw() {
         // 将程序添加到OpenGL ES环境
@@ -178,7 +164,6 @@ public class BaseFilter {
         //绑定指定的纹理id
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
 
-
         /** 绘制三角形，三个顶点*/
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
 
@@ -187,11 +172,8 @@ public class BaseFilter {
         GLES20.glDisableVertexAttribArray(mTexCoordHandle);
     }
 
-
     public void onDestroy() {
         GLES20.glDeleteProgram(mProgram);
         mProgram = 0;
     }
-
-
 }

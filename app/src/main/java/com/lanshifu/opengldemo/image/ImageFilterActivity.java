@@ -41,7 +41,7 @@ public class ImageFilterActivity extends AppCompatActivity {
             mBitmap = BitmapFactory.decodeStream(getResources().getAssets().open("picture.png"));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("lxb", "onSurfaceCreated: "+e.getMessage());
+            Log.e("lxb", "onSurfaceCreated: " + e.getMessage());
         }
         if (mBitmap == null) {
             Log.e("lxb", "initTexture: mBitmap == null");
@@ -78,8 +78,7 @@ public class ImageFilterActivity extends AppCompatActivity {
             case R.id.mFour:
                 mFilterRenderer.setType(ShaderManager.FOUR_SHADER);
                 break;
-
-                case R.id.light:
+            case R.id.light:
                 mFilterRenderer.setType(ShaderManager.LIGHT_SHADER);
                 break;
 

@@ -29,7 +29,6 @@
         </activity>
         <activity android:name=".image.ImageFilterActivity" />
         <activity android:name=".VaryActivity" />
-        <activity android:name=".preview.PreviewActivity" />
         <activity android:name=".camera.Camera2Activity" />
         <activity android:name=".camera.camera2_surface_demo.Camera2Demo_SurfaceView_Activity" />
     </application>
