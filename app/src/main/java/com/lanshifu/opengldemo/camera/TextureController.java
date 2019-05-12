@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -259,23 +260,38 @@ public class TextureController implements GLSurfaceView.Renderer {
     //需要回调，则缩放图片到指定大小，读取数据并回调
     private void callbackIfNeeded() {
         if (mFrameCallback != null && (isRecord || isShoot)) {
-            indexOutput = indexOutput++ >= 2 ? 0 : indexOutput;
+            Log.d("lxb", "callbackIfNeeded: 拍照开始");
+
+
+            if (indexOutput >= outPutBuffer.length -1){
+                indexOutput = 0;
+            }
+
+            Log.d("lxb", "indexOutput: " + indexOutput);
+
             if (outPutBuffer[indexOutput] == null) {
                 outPutBuffer[indexOutput] = ByteBuffer.allocate(frameCallbackWidth *
                     frameCallbackHeight*4);
             }
+            //这里感觉是拍照的时候闪一下，代表排到了
+
             GLES20.glViewport(0, 0, frameCallbackWidth, frameCallbackHeight);
+
+            //要拍照才需要 bindFrameTexture，获取离屏buffer
             EasyGlUtils.bindFrameTexture(mExportFrame[0],mExportTexture[0]);
             mShowFilter.setMatrix(callbackOM);
             mShowFilter.draw();
             frameCallback();
-            isShoot = false;
             EasyGlUtils.unBindFrameBuffer();
+
+            indexOutput++;
+            isShoot = false;
             mShowFilter.setMatrix(SM);
+            Log.d("lxb", "callbackIfNeeded: 拍照完成");
         }
     }
 
-    //读取数据并回调
+    //读取数据并回调，读到outPutBuffer里去
     private void frameCallback(){
         GLES20.glReadPixels(0, 0, frameCallbackWidth, frameCallbackHeight,
             GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, outPutBuffer[indexOutput]);

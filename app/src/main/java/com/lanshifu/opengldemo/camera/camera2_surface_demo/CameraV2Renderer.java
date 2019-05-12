@@ -11,6 +11,7 @@ import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterC
 import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterFour;
 import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterGray;
 import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterLight;
+import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterNone;
 import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterWarm;
 import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterZoom;
 import com.lanshifu.opengldemo.utils.GLUtil;
@@ -25,34 +26,25 @@ import static android.opengl.GLES20.glViewport;
 public class CameraV2Renderer implements GLSurfaceView.Renderer {
     public static final String TAG = "CameraV2Renderer";
     private Context mContext;
-    GLSurfaceView mCameraV2GLSurfaceView;
+    GLSurfaceView mGLSurfaceView;
     CameraV2 mCamera;
-    boolean bIsPreviewStarted;
     private int mTextureId = -1;
     private SurfaceTexture mSurfaceTexture;
-    private float[] transformMatrix = new float[16];
-    private int[] mFBOIds = new int[1];
+    private float[] mTransformMatrix = new float[16];
 
     Camera2BaseFilter mCamera2BaseFilter;
 
-    public void init(GLSurfaceView surfaceView, CameraV2 camera, boolean isPreviewStarted, Context context) {
+    public void init(GLSurfaceView surfaceView, CameraV2 camera, Context context) {
         mContext = context;
-        mCameraV2GLSurfaceView = surfaceView;
+        mGLSurfaceView = surfaceView;
         mCamera = camera;
-        bIsPreviewStarted = isPreviewStarted;
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         ShaderManager.init(mContext);
-        //1、获取一个纹理id，传给
-        mTextureId = GLUtil.getOESTextureId();
-        mCamera2BaseFilter = new Camera2BaseFilter(mContext, mTextureId);
-
-//        // 这个应该是离频渲染用到
-//        glGenFramebuffers(1, mFBOIds, 0);
-//        glBindFramebuffer(GL_FRAMEBUFFER, mFBOIds[0]);
-//        Log.i(TAG, "onSurfaceCreated: mFBOId: " + mFBOIds[0]);
+        initSurfaceTexture();
+        mCamera2BaseFilter = new Camera2FilterNone(mContext, mTextureId);
 
     }
 
@@ -60,62 +52,50 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         glViewport(0, 0, width, height);
         Log.i(TAG, "onSurfaceChanged: " + width + ", " + height);
-
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        Long t1 = System.currentTimeMillis();
-        if (mSurfaceTexture != null) {
-            //surfaceTexture.updateTexImage()更新预览上的图像
-            mSurfaceTexture.updateTexImage();
-            //获取变换矩阵
-            mSurfaceTexture.getTransformMatrix(transformMatrix);
-        }
 
-        //预览在这里启动
-        if (!bIsPreviewStarted) {
-            bIsPreviewStarted = initSurfaceTexture();
-            bIsPreviewStarted = true;
-            return;
-        }
-        
-        if (mFilterChange){
+        //mSurfaceTexture.updateTexImage()更新预览上的图像
+        mSurfaceTexture.updateTexImage();
+        //直接通过 SurfaceTexture 获取变换矩阵
+        mSurfaceTexture.getTransformMatrix(mTransformMatrix);
+
+        if (mFilterChange) {
             updateFilterView();
         }
 
-        //glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-        mCamera2BaseFilter.draw(transformMatrix);
+        mCamera2BaseFilter.draw(mTransformMatrix);
 
-        long t2 = System.currentTimeMillis();
-        long t = t2 - t1;
-        Log.i(TAG, "onDrawFrame: time: " + t);
     }
 
-    public boolean initSurfaceTexture() {
-        if (mCamera == null || mCameraV2GLSurfaceView == null) {
-            Log.i(TAG, "mCamera or mGLSurfaceView is null!");
-            return false;
-        }
+    //创建 SurfaceTexture，CameraV2.startPreview()方法需要SurfaceTexture
+    public void initSurfaceTexture() {
+        //1、获取一个纹理id
+        mTextureId = GLUtil.getOESTextureId();
+        //2、纹理id设置到 SurfaceTexture 中，
         mSurfaceTexture = new SurfaceTexture(mTextureId);
-        //和图片不同的是，图片数据是相同的，而摄像头数据是变换的，所以每当摄像头有新的数据来时，我们需要通过surfaceTexture.updateTexImage()更新预览上的图像
+        //图片数据固定的，而摄像头数据是变换的，所以每当摄像头有新的数据来时，我们需要通过surfaceTexture.updateTexImage()更新预览上的图像
         // updateTexImage 不应该在OnFrameAvailableLister的回调方法中直接调用，而应该在onDrawFrame中执行。而调用requestRender，可以触发onDrawFrame
         mSurfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                 Log.d(TAG, "onFrameAvailable: ");
-                mCameraV2GLSurfaceView.requestRender();
+                mGLSurfaceView.requestRender();
             }
         });
 
-        mCamera.startPreview(mSurfaceTexture);
-        return true;
+        //将 SurfaceTexture 设置给CameraV2,然后调用startPreview
+        mCamera.setSurfaceTexture(mSurfaceTexture);
+        mCamera.startPreview();
     }
 
 
     boolean mFilterChange = false;
     int mFilterType;
+
     public void setType(int filterType) {
         if (this.mFilterType == filterType) {
             Log.d(TAG, "setType: this.mFilterType == mFilterType");
@@ -133,7 +113,7 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
                 mCamera2BaseFilter = new Camera2FilterGray(mContext, mTextureId);
                 break;
             case ShaderManager.BASE_SHADER:
-                mCamera2BaseFilter = new Camera2BaseFilter(mContext, mTextureId);
+                mCamera2BaseFilter = new Camera2FilterNone(mContext, mTextureId);
                 break;
             case ShaderManager.WARM_SHADER:
                 mCamera2BaseFilter = new Camera2FilterWarm(mContext, mTextureId);
@@ -154,7 +134,7 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
                 mCamera2BaseFilter = new Camera2FilterLight(mContext, mTextureId);
                 break;
             default:
-                mCamera2BaseFilter = new Camera2BaseFilter(mContext, mTextureId);
+                mCamera2BaseFilter = new Camera2FilterNone(mContext, mTextureId);
                 break;
         }
         mFilterChange = false;

@@ -21,12 +21,11 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
+/**
+ * 封装了Camera2 API，打开相机，打开预览都封装起来
+ */
 public class CameraV2 {
     public static final String TAG = "CameraV2";
 
@@ -37,26 +36,32 @@ public class CameraV2 {
     private HandlerThread mCameraThread;
     private Handler mCameraHandler;
     private CaptureRequest.Builder mCaptureRequestBuilder;
-    private CaptureRequest mCaptureRequest;
-    private CameraCaptureSession mCameraCaptureSession;
     private String[] mCameraIdList;
+    boolean mStartPreview = false;
 
-    public CameraV2(Activity activity,int width, int height) {
+    SurfaceTexture mSurfaceTexture;
+
+    public void setSurfaceTexture(SurfaceTexture surfaceTexture) {
+        this.mSurfaceTexture = surfaceTexture;
+    }
+
+    public CameraV2(Activity activity) {
         mActivity = activity;
+        //1.启动Camera线程
         startCameraThread();
 
-        setupCamera(width,height);
+        //2.准备Camera，获取cameraId，获取Camera预览大小
+        setupCamera();
 
+        //打开Camera
         openCamera();
     }
 
     /**
      * 相机设置
-     * @param width
-     * @param height
      * @return
      */
-    public String setupCamera(int width, int height) {
+    public String setupCamera() {
         CameraManager cameraManager = (CameraManager) mActivity.getSystemService(Context.CAMERA_SERVICE);
         try {
             mCameraIdList = cameraManager.getCameraIdList();
@@ -67,9 +72,9 @@ public class CameraV2 {
                     continue;
                 }
                 StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-                mPreviewSize = getOptimalSize(map.getOutputSizes(SurfaceTexture.class), width, height);
+                mPreviewSize = map.getOutputSizes(SurfaceTexture.class)[0];
                 mCameraId = id;
-                Log.i(TAG, "preview width = " + mPreviewSize.getWidth() + ", height = " + mPreviewSize.getHeight() + ", cameraId = " + mCameraId);
+                Log.d(TAG, "setupCamera: preview width = " + mPreviewSize.getWidth() + ", height = " + mPreviewSize.getHeight() + ", cameraId = " + mCameraId);
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -78,6 +83,11 @@ public class CameraV2 {
     }
 
 
+    /**
+     * 转换摄像头的时候调用，设置相机Id
+     * @param cameraId
+     * @return
+     */
     public boolean setCameraId(String cameraId){
         for (String containCamera : mCameraIdList) {
             if (containCamera.equals(cameraId)){
@@ -89,9 +99,7 @@ public class CameraV2 {
         return false;
     }
 
-    public String getCameraId(){
-        return mCameraId;
-    }
+
 
     public void startCameraThread() {
         mCameraThread = new HandlerThread("CameraThread");
@@ -127,6 +135,7 @@ public class CameraV2 {
         @Override
         public void onOpened(@NonNull CameraDevice camera) {
             mCameraDevice = camera;
+            startPreview();
         }
 
         @Override
@@ -142,49 +151,33 @@ public class CameraV2 {
         }
     };
 
-    private Size getOptimalSize(Size[] sizeMap, int width, int height) {
-        List<Size> sizeList = new ArrayList<>();
-        for (Size option : sizeMap) {
-            if (width > height) {
-                if (option.getWidth() > width && option.getHeight() > height) {
-                    sizeList.add(option);
-                }
-            } else {
-                if (option.getWidth() > height && option.getHeight() > width) {
-                    sizeList.add(option);
-                }
-            }
-        }
-        if (sizeList.size() > 0) {
-            return Collections.min(sizeList, new Comparator<Size>() {
-                @Override
-                public int compare(Size lhs, Size rhs) {
-                    return Long.signum(lhs.getWidth() * lhs.getHeight() - rhs.getWidth() * rhs.getHeight());
-                }
-            });
-        }
-        return sizeMap[0];
-    }
-
-
     /**
      * 启动预览，需要传 SurfaceTexture
-     * @param surfaceTexture
      */
-    public void startPreview(SurfaceTexture surfaceTexture) {
-        surfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-        Surface surface = new Surface(surfaceTexture);
+    public void startPreview() {
+        if (mStartPreview || mSurfaceTexture == null || mCameraDevice == null){
+            return;
+        }
+        mStartPreview = true;
+
+        //给 SurfaceTexture 设置默认大小，mPreviewSize是相机预览大小
+        mSurfaceTexture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+        //Surface 需要接收一个 SurfaceTexture
+        Surface surface = new Surface(mSurfaceTexture);
         try {
+            // 通过CameraDevice创建request
             mCaptureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            //surface 作为输出的目标，预览的数据会传到 Surface 中
             mCaptureRequestBuilder.addTarget(surface);
+            //创建会话， surface 这里传进去，然后只需关心回调
             mCameraDevice.createCaptureSession(Arrays.asList(surface), new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     try {
-                        mCaptureRequest = mCaptureRequestBuilder.build();
-                        mCameraCaptureSession = session;
-                        mCameraCaptureSession.setRepeatingRequest(mCaptureRequest, null, mCameraHandler);
-                    } catch (CameraAccessException e) {
+                        CaptureRequest mCaptureRequest = mCaptureRequestBuilder.build();
+                        //设置一直重复捕获图像，不设置就只有一帧，没法预览
+                        session.setRepeatingRequest(mCaptureRequest, null, mCameraHandler);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
