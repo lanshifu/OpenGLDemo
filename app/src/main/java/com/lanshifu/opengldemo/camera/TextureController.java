@@ -273,7 +273,6 @@ public class TextureController implements GLSurfaceView.Renderer {
                 outPutBuffer[indexOutput] = ByteBuffer.allocate(frameCallbackWidth *
                     frameCallbackHeight*4);
             }
-            //这里感觉是拍照的时候闪一下，代表排到了
 
             GLES20.glViewport(0, 0, frameCallbackWidth, frameCallbackHeight);
 

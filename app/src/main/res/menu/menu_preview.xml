@@ -26,4 +26,13 @@
         android:title="四分镜" />
     <item android:id="@+id/light"
         android:title="发光" />
+
+    <item android:id="@+id/soul_out"
+        android:title="灵魂出窍" />
+    <item android:id="@+id/shake"
+        android:title="抖动" />
+    <item android:id="@+id/burr"
+        android:title="毛刺" />
+    <item android:id="@+id/illusion"
+        android:title="幻觉" />
 </menu>

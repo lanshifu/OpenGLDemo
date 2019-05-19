@@ -108,7 +108,7 @@ public abstract class Camera2BaseFilter {
     protected abstract ShaderManager.Param getProgram();
 
 
-    public void draw( float[] transformMatrix) {
+    public void draw(float[] transformMatrix) {
         // 将程序添加到OpenGL ES环境
         GLES20.glUseProgram(mProgram);
 

@@ -1,7 +1,10 @@
 package com.lanshifu.opengldemo.camera.camera2_surface_demo;
 
+import android.graphics.Bitmap;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -9,11 +12,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.lanshifu.opengldemo.R;
 import com.lanshifu.opengldemo.utils.ShaderManager;
 
-public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
+
+public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity implements CameraV2Renderer.CameraCallback {
 
     private static final String TAG = "Camera2Demo_SurfaceView";
 
@@ -22,6 +34,7 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
     private GLSurfaceView mCameraV2GLSurfaceView;
     private CameraV2Renderer mCameraV2Renderer;
     private CameraV2 mCamera;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,6 +44,7 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         mWidthPixels = dm.widthPixels;
         mHeightPixels = dm.heightPixels;
+        Log.d(TAG, "onCreate: mWidthPixels = " + mWidthPixels + ", mHeightPixels= "+ mHeightPixels);
 
         setContentView(R.layout.camera2_surfaceview_activity);
         initView();
@@ -45,13 +59,14 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
 
         mCameraV2Renderer = new CameraV2Renderer();
         mCameraV2Renderer.init(mCameraV2GLSurfaceView, mCamera, this);
+        mCameraV2Renderer.setCameraCallback(this);
         mCameraV2GLSurfaceView.setRenderer(mCameraV2Renderer);
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_preview, menu);
+        getMenuInflater().inflate(R.menu.menu_preview, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -66,15 +81,9 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
 //                } else {
 //                    mCamera.setCameraId("0");
 //                }
+//                mCamera.openCamera();
 //
-//                if (!mCamera.openCamera()) {
-//                    return true;
-//                }
-//
-//                mCamera = new CameraV2(this, mWidthPixels, mHeightPixels);
-//                mCameraV2Renderer = new CameraV2Renderer();
-//                mCameraV2Renderer.init(mGLSurfaceView, mCamera, false, this);
-//                mGLSurfaceView.setRenderer(mCameraV2Renderer);
+//                mCameraV2Renderer.setSwitchCamera(true);
 
                 break;
 
@@ -103,6 +112,10 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
                 mCameraV2Renderer.setType(ShaderManager.LIGHT_SHADER);
                 break;
 
+            case R.id.soul_out:
+                mCameraV2Renderer.setType(ShaderManager.CAMERA_BUZZ_DOUYIN_OUT);
+                break;
+
         }
         return super.onOptionsItemSelected(item);
 
@@ -124,5 +137,77 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity {
 
     public void takePicture(View view) {
         Log.d(TAG, "onclick takePicture: ");
+        mCameraV2Renderer.takePicture();
     }
+
+
+    //拍照帧数据回调
+    @Override
+    public void onFrameCallBack(final int[] bytes) {
+
+        final int[] outputBytes = bytes;
+        final int width = mCameraV2Renderer.mFrameCallbackWidth;
+        final int height = mCameraV2Renderer.mFrameCallbackHeight;
+//       final int width = mWidthPixels;
+//        final int height = mHeightPixels;
+        Log.d(TAG, "onFrameCallBack: bitmap width = "+ width);
+        Log.d(TAG, "onFrameCallBack: bitmap height = "+ height);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                IntBuffer byteBuffer = IntBuffer.wrap(outputBytes);
+                byteBuffer.rewind();//解决 Buffer not large enough for pixels
+                Log.d(TAG, "run: byteBuffer= "+byteBuffer);
+                bitmap.copyPixelsFromBuffer(byteBuffer);
+                saveBitmap(bitmap);
+                bitmap.recycle();
+            }
+        }).start();
+    }
+
+
+
+    //图片保存
+    public void saveBitmap(Bitmap bitmap) {
+        Log.d(TAG, "saveBitmap: ");
+        String path = getSD() + "/OpenGLDemo/photo/";
+        File folder = new File(path);
+        if (!folder.exists() && !folder.mkdirs()) {
+            Log.e(TAG, "saveBitmap: 无法保存照片" );
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(Camera2Demo_SurfaceView_Activity.this,"无法保存照片",Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            return;
+        }
+        long dataTake = System.currentTimeMillis();
+        final String jpegName = path + "_" + dataTake + ".jpg";
+        try {
+            FileOutputStream fos = new FileOutputStream(jpegName);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Log.w(TAG, "saveBitmap: 保存成功,耗时："  + (System.currentTimeMillis() - dataTake));
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(Camera2Demo_SurfaceView_Activity.this,"保存成功,路径："+jpegName,Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    protected String getSD() {
+        return Environment.getExternalStorageDirectory().getAbsolutePath();
+    }
+
 }

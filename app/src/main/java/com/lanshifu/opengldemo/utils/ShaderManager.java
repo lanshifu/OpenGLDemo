@@ -9,7 +9,9 @@ import android.util.SparseArray;
  */
 public class ShaderManager {
 
-    /**图片部分*/
+    /**
+     * 图片部分
+     */
     public static final int BASE_SHADER = 1;  //默认
     public static final int GRAY_SHADER = 2;  //黑白、灰色
     public static final int WARM_SHADER = 3;  //暖色
@@ -19,7 +21,9 @@ public class ShaderManager {
     public static final int ZOOM_SHADER = 7;  //放大
     public static final int LIGHT_SHADER = 8;  //发光,比较复杂一点
 
-    /**相机部分*/
+    /**
+     * 相机部分
+     */
     public static final int CAMERA_BASE_SHADER = 9;  //相机默认
     public static final int CAMERA_GRAY_SHADER = 10;  //
     public static final int CAMERA_COOL_SHADER = 11;  //
@@ -28,6 +32,8 @@ public class ShaderManager {
     public static final int CAMERA_ZOOM_SHADER = 14;  //
     public static final int CAMERA_LIGHT_SHADER = 15;  //
     public static final int CAMERA_BUZZ_SHADER = 16;  //
+    public static final int CAMERA_BUZZ_DOUYIN_OUT = 17;  //
+    public static final int CAMERA_BUZZ_DOUYIN_THREE = 18;
 
     private static SparseArray<Param> mParamSparseArray;
 
@@ -73,16 +79,21 @@ public class ShaderManager {
 
         insertParam(CAMERA_FOUR_SHADER, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
                 , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_four.glsl"));
-
+//
         insertParam(CAMERA_ZOOM_SHADER, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
                 , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_zoom.glsl"));
 
+        insertParam(CAMERA_BUZZ_SHADER, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_buzzy.glsl"));
 
-//        insertParam(CAMERA_BUZZ_SHADER, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
-//                , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_buzzy.glsl"));
+        insertParam(CAMERA_LIGHT_SHADER, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_light.glsl"));
 
-//        insertParam(CAMERA_LIGHT_SHADER, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
-//                , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_light.glsl"));
+        insertParam(CAMERA_BUZZ_DOUYIN_OUT, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_douyin_out.glsl"));
+
+        insertParam(CAMERA_BUZZ_DOUYIN_THREE, GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_vertex_shader_base.glsl")
+                , GLUtil.loadFromAssetsFile(context, "shader/camera2/camera2_fragment_shader_three.glsl"));
     }
 
 

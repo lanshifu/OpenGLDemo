@@ -32,7 +32,7 @@ public class CameraV2 {
     private Activity mActivity;
     private CameraDevice mCameraDevice;
     private String mCameraId;
-    private Size mPreviewSize;
+    public Size mPreviewSize;
     private HandlerThread mCameraThread;
     private Handler mCameraHandler;
     private CaptureRequest.Builder mCaptureRequestBuilder;
@@ -99,6 +99,9 @@ public class CameraV2 {
         return false;
     }
 
+    public String getCameraId(){
+        return mCameraId;
+    }
 
 
     public void startCameraThread() {
