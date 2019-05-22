@@ -19,7 +19,6 @@ import com.lanshifu.opengldemo.camera.camera2_surface_demo.filter.Camera2FilterZ
 import com.lanshifu.opengldemo.utils.GLUtil;
 import com.lanshifu.opengldemo.utils.ShaderManager;
 
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -40,18 +39,12 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
     private boolean mSwitchCamera;
 
 
-    //回调数据的宽高
+    //回调数据的宽，init 赋值
     public int mFrameCallbackWidth = 720;
     public int mFrameCallbackHeight = 1080;
-    //创建离屏buffer，用于最后导出数据
-    private int[] mExportFrame = new int[1];
-    private int[] mExportTexture = new int[1];
-    private IntBuffer mOutPutByteBuffer;      //用于存储回调数据的buffer
+    //用于存储拍照回调数据的buffer，大小是宽乘以高
+    private IntBuffer mOutPutIntBuffer;
 
-
-    public void setSwitchCamera(boolean switchCamera) {
-        mSwitchCamera = switchCamera;
-    }
 
     Camera2BaseFilter mCamera2BaseFilter;
 
@@ -76,6 +69,8 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         glViewport(0, 0, width, height);
         Log.i(TAG, "onSurfaceChanged: " + width + ", " + height);
+        mFrameCallbackWidth = width;
+        mFrameCallbackHeight = height;
     }
 
     @Override
@@ -101,8 +96,7 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
         mCamera2BaseFilter.draw(mTransformMatrix);
 
         if (mTakePicture) {
-            mTakePicture = false;
-            onFrameCallBack();
+            doTakePicture();
         }
 
     }
@@ -183,47 +177,45 @@ public class CameraV2Renderer implements GLSurfaceView.Renderer {
     /**
      * 拍照部分
      */
-    boolean mTakePicture = false;
+    private boolean mTakePicture = false;
 
     public void takePicture() {
         mTakePicture = true;
     }
 
-    public void onFrameCallBack() {
-
-        if (mOutPutByteBuffer == null) {
-            mOutPutByteBuffer = IntBuffer.allocate(mFrameCallbackWidth *
+    private void doTakePicture() {
+        Log.d(TAG, "doTakePicture: mFrameCallbackWidth= "+ mFrameCallbackWidth + " ,mFrameCallbackHeight=" +mFrameCallbackHeight);
+        mTakePicture = false;
+        if (mOutPutIntBuffer == null) {
+            mOutPutIntBuffer = IntBuffer.allocate(mFrameCallbackWidth *
                     mFrameCallbackHeight);
         }
 
-        // 绑定，获取离屏buffer
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, mExportFrame[0]);
-        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0,
-                GLES20.GL_TEXTURE_2D, mExportTexture[0], 0);
+        //todo 这里可以用离屏渲染的方式，增加水印，后面再加
+//        mCamera2BaseFilter.draw(mTransformMatrix);
 
-        mCamera2BaseFilter.draw(mTransformMatrix);
-
+        //通过这个api获取画的这一帧数据
         GLES20.glReadPixels(0, 0, mFrameCallbackWidth, mFrameCallbackHeight,
-                GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mOutPutByteBuffer);
+                GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mOutPutIntBuffer);
 
-        //帧数据回调
-        if (mCameraCallback != null) {
-
-            //图像反转，纠正
-            int[] origin = mOutPutByteBuffer.array();
-            int[] result = new int[mFrameCallbackWidth * mFrameCallbackHeight];
-            //这个需要研究一下？
-            for (int i = 0; i < mFrameCallbackHeight; i++) {
-                System.arraycopy(origin, i * mFrameCallbackWidth, result,
-                        (mFrameCallbackHeight - i - 1) * mFrameCallbackWidth, mFrameCallbackHeight);
+        //获取到图片数据了
+        int[] origin = mOutPutIntBuffer.array();
+        int[] result = new int[mFrameCallbackWidth * mFrameCallbackHeight];
+        //解决方向颠倒问题
+        for (int i = 0; i < mFrameCallbackHeight; i++) {
+            for (int j = 0; j < mFrameCallbackWidth; j++) {
+                int pix = origin[i * mFrameCallbackWidth + j];
+                int pb = (pix >> 16) & 0xff;
+                int pr = (pix << 16) & 0x00ff0000;
+                int pix1 = (pix & 0xff00ff00) | pr | pb;
+                result[(mFrameCallbackHeight - i - 1) * mFrameCallbackWidth + j] = pix1;
             }
-
-            mCameraCallback.onFrameCallBack(result);
         }
 
-        //解绑
-        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-
+        //帧数据回调, Activity中做保存图片操作
+        if (mCameraCallback != null) {
+            mCameraCallback.onFrameCallBack(result);
+        }
     }
 
 

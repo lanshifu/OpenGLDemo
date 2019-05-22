@@ -44,7 +44,7 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity implemen
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         mWidthPixels = dm.widthPixels;
         mHeightPixels = dm.heightPixels;
-        Log.d(TAG, "onCreate: mWidthPixels = " + mWidthPixels + ", mHeightPixels= "+ mHeightPixels);
+        Log.d(TAG, "onCreate: mWidthPixels = " + mWidthPixels + ", mHeightPixels= " + mHeightPixels);
 
         setContentView(R.layout.camera2_surfaceview_activity);
         initView();
@@ -145,20 +145,15 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity implemen
     @Override
     public void onFrameCallBack(final int[] bytes) {
 
-        final int[] outputBytes = bytes;
         final int width = mCameraV2Renderer.mFrameCallbackWidth;
         final int height = mCameraV2Renderer.mFrameCallbackHeight;
-//       final int width = mWidthPixels;
-//        final int height = mHeightPixels;
-        Log.d(TAG, "onFrameCallBack: bitmap width = "+ width);
-        Log.d(TAG, "onFrameCallBack: bitmap height = "+ height);
+        Log.d(TAG, "onFrameCallBack: bitmap width = " + width);
+        Log.d(TAG, "onFrameCallBack: bitmap height = " + height);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                IntBuffer byteBuffer = IntBuffer.wrap(outputBytes);
-                byteBuffer.rewind();//解决 Buffer not large enough for pixels
-                Log.d(TAG, "run: byteBuffer= "+byteBuffer);
+                IntBuffer byteBuffer = IntBuffer.wrap(bytes);
                 bitmap.copyPixelsFromBuffer(byteBuffer);
                 saveBitmap(bitmap);
                 bitmap.recycle();
@@ -167,18 +162,17 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity implemen
     }
 
 
-
     //图片保存
     public void saveBitmap(Bitmap bitmap) {
         Log.d(TAG, "saveBitmap: ");
         String path = getSD() + "/OpenGLDemo/photo/";
         File folder = new File(path);
         if (!folder.exists() && !folder.mkdirs()) {
-            Log.e(TAG, "saveBitmap: 无法保存照片" );
+            Log.e(TAG, "saveBitmap: 无法保存照片");
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(Camera2Demo_SurfaceView_Activity.this,"无法保存照片",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Camera2Demo_SurfaceView_Activity.this, "无法保存照片", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -196,11 +190,12 @@ public class Camera2Demo_SurfaceView_Activity extends AppCompatActivity implemen
             e.printStackTrace();
         }
 
-        Log.w(TAG, "saveBitmap: 保存成功,耗时："  + (System.currentTimeMillis() - dataTake));
+        final long takeTime = System.currentTimeMillis() - dataTake;
+        Log.w(TAG, "saveBitmap: 保存成功,耗时：" + takeTime);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(Camera2Demo_SurfaceView_Activity.this,"保存成功,路径："+jpegName,Toast.LENGTH_SHORT).show();
+                Toast.makeText(Camera2Demo_SurfaceView_Activity.this, "保存成功,路径：" + jpegName + "，耗时：" + takeTime, Toast.LENGTH_SHORT).show();
             }
         });
 
